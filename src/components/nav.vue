@@ -52,7 +52,7 @@ export default {
 }
 #nav {
   padding: 70px 0 0 0;
-  background-color: #000000ad;
+  background-color: rgba(0, 0, 0, 0.68);
   width: 70px;
   height: calc(100vh - 70px);
   display: flex;

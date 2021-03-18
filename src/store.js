@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import util from '@/util/util'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -13,7 +14,8 @@ export default new Vuex.Store({
             albumID: 0,
             picUrl: 0,
             musicUrl: 0,
-            duration: 0
+            duration: 0,
+            totalTime: 0
         },
         musicList: {
 
@@ -24,6 +26,7 @@ export default new Vuex.Store({
     },
     mutations: {
         getMusicInfo(state, MusicInfo) {
+            console.log(MusicInfo[0].totalTime);
             state.musicInfo.musicID = MusicInfo[0].musicID;
             state.musicInfo.musicName = MusicInfo[0].musicName;
             state.musicInfo.artist = MusicInfo[0].artist;
@@ -33,6 +36,7 @@ export default new Vuex.Store({
             state.musicInfo.musicUrl = MusicInfo[0].musicID;
             state.musicInfo.picUrl = MusicInfo[0].picUrl;
             state.musicInfo.duration = MusicInfo[0].duration;
+            state.musicInfo.totalTime = MusicInfo[0].totalTime;
         },
         getPicURL(state, step) {
             state.musicInfo.picUrl = step;

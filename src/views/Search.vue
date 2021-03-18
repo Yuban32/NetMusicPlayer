@@ -2,7 +2,7 @@
   <div class="search">
     <router-view></router-view>
     <div class="view">
-      <div class="searchInput">
+      <div class="search-input">
         <input
           type="text"
           placeholder="查询..."
@@ -10,19 +10,19 @@
           @keydown.enter="search"
         />
         <font-awesome-icon
-          class="searchIcon"
+          class="search-icon"
           :icon="['fas', 'search']"
           @click="search"
         />
       </div>
       {{ error }}
-      <div class="dataView">
+      <div class="data-view">
         <ul @scroll="handleScroll($event)">
           <li v-for="(item, index) in songList" :key="index">
             <div class="container">
               <span class="order">{{ index + 1 }}</span>
-              <img class="listImg" :src="item.picUrl + '?param=45y45'" alt="" />
-              <span class="musicTitle"
+              <img class="list-img" :src="item.picUrl + '?param=45y45'" alt="" />
+              <span class="music-title"
                 >{{ item.musicName }}<span> - {{ item.album }}</span></span
               >
               <font-awesome-icon
@@ -37,7 +37,7 @@
                     item.duration
                   )
                 "
-                class="PBList"
+                class="PB-list"
                 :icon="['fas', 'play-circle']"
               />
             </div>
@@ -45,11 +45,11 @@
             <!-- <div class="container">
               <img :src="url" alt="" />
               <span class="order">{{ index + 1 }}</span>
-              <span class="musicTitle">
+              <span class="music-title">
                 {{ item.name }} - {{ item.artists[0].name }}</span
               >
               <font-awesome-icon
-                class="PBList"
+                class="PB-list"
                 :icon="['fas', 'play-circle']"
               />
             </div> -->
@@ -73,6 +73,7 @@
 <script>
 // import { mapMutations } from 'vuex';
 import { mapState } from "vuex";
+import util from '@/util/util'
 export default {
   name: "Search",
   data() {
@@ -87,15 +88,13 @@ export default {
   },
   methods: {
     sendInfo(musicID, musicName, artist, artistID, album, albumID, duration) {
-      // console.log(musicID);
       let list = [];
       let MusicInfo = [];
       this.axios.get("/album?id=" + albumID).then((response) => {
-        // console.log(response);
         // 获取歌曲的封面
         let picUrl = response.data.album.picUrl;
-        this.$store.commit("getPicURL", picUrl);
-      });
+        duration = parseInt(duration/1000);
+        let totalTime = util.playTimeFormat(duration)
       MusicInfo.push({
         musicID,
         musicName,
@@ -104,10 +103,16 @@ export default {
         album,
         albumID,
         duration,
+        picUrl,
+        totalTime
+      });
+      this.$store.commit("getMusicInfo", MusicInfo);
+
+      util.mediaMetaDataHandle(MusicInfo);
+
       });
       document.title = `${musicName} - ${artist}`;
       this.$store.commit("isPlay", true);
-      this.$store.commit("getMusicInfo", MusicInfo);
 
       // this.songList.forEach((v) => {
       //   list.push({
@@ -126,7 +131,6 @@ export default {
         clearTimeout(this.timer);
         this.list = [];
         this.timer = setTimeout(() => {
-          console.log(this.searchKeyWord);
           this.axios
             .get("https://api.wick32.cn/search?keywords=" + this.searchKeyWord)
             .then((response) => {
@@ -236,17 +240,17 @@ export default {
   padding-top: 2px;
   position: relative;
 }
-.container:hover .PBList {
+.container:hover .PB-list {
   bottom: 5px;
 }
-.PBList {
+.PB-list {
   position: absolute;
   bottom: -20px;
   left: 120px;
   cursor: pointer;
   transition: all 0.2s ease-in;
 }
-.musicTitle {
+.music-title {
   line-height: 20px;
 }
 .search {
@@ -257,11 +261,11 @@ export default {
   flex: 1;
 }
 
-.dataView {
-  height: calc(100% - 30px);
+.data-view {
+  height: 100%;
 }
 
-.dataView > ul {
+.data-view > ul {
   /* overflow: auto; */
   overflow-y: scroll;
   height: 100%;
@@ -270,13 +274,13 @@ export default {
 .view {
   /* background-color: antiquewhite; */
   padding: 20px 0 0 0;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border-left: 1px solid rgba(255, 255, 255, 0.8);
-  height: calc(100% - 110px);
+  height: calc(100vh - 110px);
   overflow-y: auto;
 }
 
-.searchInput > input {
+.search-input > input {
   display: inline-block;
   background: transparent;
   outline: none;
@@ -289,7 +293,7 @@ export default {
   position: relative;
 }
 
-.searchIcon {
+.search-icon {
   font-size: 22px;
   cursor: pointer;
 }

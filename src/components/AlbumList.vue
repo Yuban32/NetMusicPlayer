@@ -74,6 +74,7 @@
 <script>
 import { mapMutations, mapState } from "vuex";
 import List from "./List";
+import util from '@/util/util'
 export default {
   name: "AlbumList",
   data() {
@@ -107,13 +108,15 @@ export default {
       picUrl,
       duration
     ) {
-      this.axios.get("/album?id=" + albumID).then((response) => {
-        // console.log(response);
-        // 获取歌曲的封面
-        let picUrl = response.data.album.picUrl;
-        this.$store.commit("getPicURL", picUrl);
-      });
       let MusicInfo = [];
+      // this.axios.get("/album?id=" + albumID).then((response) => {
+      //   // console.log(response);
+      //   // 获取歌曲的封面
+      //   let picUrl = response.data.album.picUrl;
+      //   this.$store.commit("getPicURL", picUrl);
+      // });
+      duration = parseInt(duration/1000);
+        let totalTime = util.playTimeFormat(duration)
       MusicInfo.push({
         musicID,
         musicName,
@@ -122,8 +125,11 @@ export default {
         album,
         albumID,
         duration,
+        picUrl,
+        totalTime
       });
-      document.title = `${musicName} - ${artist}`;
+util.mediaMetaDataHandle(MusicInfo);
+      document.title = `${musicName} - ${artist} - Wick's播放器`;
       this.$store.commit("isPlay", true);
       this.$store.commit("getMusicInfo", MusicInfo);
     },
@@ -141,7 +147,7 @@ export default {
   width: 100%;
   height: calc(100vh - 90px);
   border-left: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(0, 0, 0, 0.521);
+  background: rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   text-align: left;

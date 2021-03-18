@@ -5,8 +5,8 @@
         <img :src="musicInfo.picUrl + '?param=400y400'" />
       </div>
       <h2 class="songTitle">{{ musicInfo.musicName }}</h2>
-      <h2 class="artist">《{{ musicInfo.album }}》</h2>
-      <h2 class="album">{{ musicInfo.artist }}</h2>
+      <h3 class="artist">《{{ musicInfo.album }}》</h3>
+      <h3 class="album">{{ musicInfo.artist }}</h3>
     </div>
   </div>
 </template>
