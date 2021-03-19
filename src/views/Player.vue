@@ -8,11 +8,13 @@
       <h3 class="artist">《{{ musicInfo.album }}》</h3>
       <h3 class="album">{{ musicInfo.artist }}</h3>
     </div>
+    <lyricView></lyricView>
   </div>
 </template>
 <script>
 // import { mapMutations } from 'vuex'
 import { mapState } from "vuex";
+import lyricView from '@/views/LyricView'
 export default {
   name: "Player",
   data() {
@@ -22,7 +24,9 @@ export default {
   computed: {
     // ...mapMutations(['getMusicId']),
     ...mapState(["musicInfo"]),
-  },
+  },components:{
+    lyricView,
+  }
 };
 </script>
 <style scoped>
@@ -58,7 +62,9 @@ h2::-webkit-scrollbar-thumb {
 }
 .player {
   display: flex;
-  justify-content: center;
+  /* justify-content: center; */
+  align-items: center;
+  flex-direction: column;
 }
 .cover {
   position: relative;
@@ -75,5 +81,7 @@ h2::-webkit-scrollbar-thumb {
   width: 100%;
   height: 100%;
   /* border-radius: 50%; */
+  
 }
+
 </style>

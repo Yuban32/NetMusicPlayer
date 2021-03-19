@@ -30,18 +30,20 @@
               
             </div>
           </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}"></div>
-            <div class="buffer-bar" ref="bufferBar"></div>
+          <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
+            <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}">
+              <div class="ball"></div>
+            </div>
+            <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
           </div>
         </div>
         <div class="right-panel">
 
         </div>
 
-        <audio ref="audioElement" :poster="musicInfo.picUrl + '?param=400y400'" style="display:none;" autoplay :src="
+        <audio ref="audioElement" :poster="musicInfo.picUrl + '?param=400y400'" style="display:block;" autoplay :src="
             `https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
-          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate" />
+          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate" @seeked="setBufferedHandle" />
       </div>
     </div>
   </div>
@@ -64,6 +66,8 @@
         currentTime:0,
         totalTime:0,
         progressBarWidth:0,
+        bufferedWidth:0,
+        fastForwardPoint:0
       };
     },
     methods: {
@@ -76,8 +80,51 @@
         let bufferBar = this.$refs.bufferBar;
         this.currentTime = util.playTimeFormat(currentTime);
         let progressScale = currentTime / duration;
-        this.progressBarWidth = progressScale * 100;
-        console.log(buffered);
+        // console.log(progressScale);
+        this.progressBarWidth = (progressScale * 100).toFixed(2);
+        // console.log(buffered);
+        this.setBufferedHandle()
+        // this.fastForward();
+
+      },
+      fastForward(e){
+        let flag = true;
+        let progressBarWrapOffsetWidth = e.target.offsetWidth;
+        let jumpPoint = parseInt((e.offsetX/progressBarWrapOffsetWidth)*100);
+        let mouseX = 0;
+        this.audioElement.currentTime = Math.floor((jumpPoint / 100)*this.audioElement.duration);
+
+          document.onmousemove = (ev)=>{
+            mouseX = ev.offsetX;
+            if (mouseX<progressBarWrapOffsetWidth) {
+              mouseX = parseInt((mouseX/progressBarWrapOffsetWidth)*100)
+              
+            }else{
+              mouseX = 100;
+            }
+            if(mouseX<0){
+              mouseX=0;
+            }
+            console.log(mouseX);
+            this.audioElement.currentTime = Math.floor((mouseX / 100)*this.audioElement.duration);
+          }
+            document.onmouseup=()=>{
+              document.onmousemove = null;
+            }
+          console.log(jumpPoint);
+        // console.log(this.fastForwardPoint);
+      }
+      ,
+      setBufferedHandle(){
+        let currentTime = parseInt(this.audioElement.currentTime);
+        let duration = this.audioElement.duration;
+        let timeRanges = this.audioElement.buffered;
+        let time = 0 ;
+        if(currentTime!==Number(time)){
+          time = currentTime;
+          this.bufferedWidth = parseInt(timeRanges.end(timeRanges.length-1)*100/duration*100)/100;
+          // console.log(this.bufferedWidth);
+        }
       },
       recommMusic() {
         this.axios.get("/personalized/newsong?limit=10").then((re) => {
@@ -308,6 +355,7 @@
     height: 20px;
     position: relative;
     overflow: hidden;
+    user-select: none;
     /* background-color: blanchedalmond; */
   }
   .progress-bar-wrap::before{
@@ -319,7 +367,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: #ffffffb9;
+    background-color: #ffffff9a;
   }
 .progress-bar-wrap .progress-bar , .progress-bar-wrap .buffer-bar{
   height: 10px;
@@ -333,13 +381,14 @@
   
 }
 .progress-bar-wrap .progress-bar{
-  background-color: red;
+  background-color: rgb(0, 161, 214);
   z-index: 2;
 }
-.progress-bar-wrap .progress-bar::before{
-  content: '';
+.progress-bar-wrap:hover .ball{
+  opacity: 1 !important;
+}
+.progress-bar-wrap .progress-bar .ball{
   /* box-sizing: border-box; */
-  display: block;
   width: 15px;
   height: 15px;
   border-radius: 50%;
@@ -349,10 +398,12 @@
   transform: translateY(-50%);
   right: 0;
   background-color: white;
+  opacity: 0;
+  transition: opacity 0.5s;
 }
 .progress-bar-wrap .buffer-bar{
   width: 10%;
-  background-color: gold;
+  background-color: #717171;
   z-index: 1;
 }
     #app .viws {

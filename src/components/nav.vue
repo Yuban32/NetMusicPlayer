@@ -11,7 +11,7 @@
         <div class="iconWrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'stream']" />
         </div>
-        推荐
+        每日推荐
       </router-link>
       <router-link key="search" tag="li" to="/search">
         <div class="iconWrap">
@@ -66,6 +66,7 @@ export default {
 }
 #nav li {
   margin-top: 10px;
+  width: 200px;
   height: 50px;
   display: flex;
   align-items: center;

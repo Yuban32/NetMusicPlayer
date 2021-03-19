@@ -20,6 +20,7 @@ class Util {
         return num < 10 ? '0' + num : num;
     }
     playTimeFormat(time) {
+        // console.log(time);
         // 时间格式化
         // let hour = this.zeroFill(Math.floor(time / 3600));
         let minutes = Math.floor(time % 3600 / 60);
