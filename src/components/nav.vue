@@ -2,31 +2,36 @@
   <div id="navWrap">
     <transition-group name="nav" tag="ul" id="nav">
       <!-- <router-link tag="li" to="/login" key="login" @click="fn()">
-        <div class="iconWrap">
+        <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['far', 'user']" />
         </div>
         登录
       </router-link> -->
       <router-link key="recoms" tag="li" to="/recom">
-        <div class="iconWrap">
+        <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'stream']" />
         </div>
-        每日推荐
+        推荐
       </router-link>
       <router-link key="search" tag="li" to="/search">
-        <div class="iconWrap">
+        <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'search']" />
         </div>
         搜索
       </router-link>
+      <router-link key="rank" tag="li" to="/rank">
+        <div class="icon-wrap">
+          <font-awesome-icon class="navIcon" :icon="['fas', 'list-ul']" />
+        </div>
+        榜单</router-link>
       <router-link key="settings" tag="li" to="/setting">
-        <div class="iconWrap">
+        <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'cog']" />
         </div>
         设置
       </router-link>
       <router-link key="abouts" tag="li" to="/about">
-        <div class="iconWrap">
+        <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'info-circle']" />
         </div>
         关于
@@ -90,7 +95,7 @@ export default {
   font-size: 3rem;
 }
 
-#nav .iconWrap {
+#nav .icon-wrap {
   margin: 10px;
   min-width: 50px;
   min-height: 50px;

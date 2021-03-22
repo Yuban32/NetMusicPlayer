@@ -26,7 +26,7 @@ export default new Vuex.Store({
     },
     mutations: {
         getMusicInfo(state, MusicInfo) {
-            console.log(MusicInfo[0].totalTime);
+            // console.log(MusicInfo[0].totalTime);
             state.musicInfo.musicID = MusicInfo[0].musicID;
             state.musicInfo.musicName = MusicInfo[0].musicName;
             state.musicInfo.artist = MusicInfo[0].artist;
@@ -52,6 +52,7 @@ export default new Vuex.Store({
         },
         getAudioElement(state, element) {
             state.audioElement = element;
+            // console.log(element);
         }
     },
     actions: {

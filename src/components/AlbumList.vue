@@ -92,11 +92,11 @@ export default {
         .get("/playlist/detail/dynamic?id=" + id)
         .then((result) => {
           this.albumDetail = result.data.playlist;
-          console.log(this.albumDetail);
+          // console.log(this.albumDetail);
           this.showAlbum = true;
         })
         .catch((err) => {});
-      console.log(this.albumDetail);
+      // console.log(this.albumDetail);
     },
     play(
       musicID,
@@ -128,6 +128,7 @@ export default {
         picUrl,
         totalTime
       });
+      // console.log(musicID);
 util.mediaMetaDataHandle(MusicInfo);
       document.title = `${musicName} - ${artist} - Wick's播放器`;
       this.$store.commit("isPlay", true);

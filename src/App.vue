@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="bg" :style="
-        `background:url(${musicInfo.picUrl}) center no-repeat;background-size: cover`
+        `background:url(${musicInfo.picUrl}?param=1200y1200) center no-repeat;background-size: cover`
       "></div>
     <navigattion />
     <div class="viws-wrap">
@@ -11,39 +11,38 @@
           <router-view />
         </transition>
       </div>
-
       <div class="play-mini">
-        <div class="play-button-control">
-          <font-awesome-icon id="backward" class="PB-control-icon" :icon="['fas', 'backward']" />
-          <font-awesome-icon v-if="!isPlay" @click="play" id="play" class="PB-control-icon" :icon="['fas', 'play']" />
-          <font-awesome-icon v-if="isPlay" @click="pause" id="pause" class="PB-control-icon" :icon="['fas', 'pause']" />
-          <font-awesome-icon id="forward" class="PB-control-icon" :icon="['fas', 'forward']" />
-        </div>
-        <div class="middle-panel">
-          <div class="music-info">
-            <div class="music-title">
-              <span>{{ musicInfo.musicName }}</span>
-              <span>{{ musicInfo.artist }}</span>
-            </div>
-            <div class="music-time">
-              <span>{{currentTime?currentTime:'0 : 00'}} / {{musicInfo.totalTime?musicInfo.totalTime:'0 : 00'}}</span>
-              
-            </div>
+        <div class="music-info">
+          <div class="music-title">
+            <span>{{ musicInfo.musicName }}</span>
+            <span>{{ musicInfo.artist }}</span>
           </div>
-          <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
-            <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}">
-              <div class="ball"></div>
-            </div>
-            <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
+          <div class="music-time">
+            <span>{{currentTime?currentTime:'0 : 00'}} / {{musicInfo.totalTime?musicInfo.totalTime:'0 : 00'}}</span>
           </div>
         </div>
-        <div class="right-panel">
 
-        </div>
+        <div class="bottom-panel">
+          <div class="play-button-control">
+            <font-awesome-icon id="backward" class="PB-control-icon" :icon="['fas', 'backward']" />
+            <font-awesome-icon v-if="!isPlay" @click="play" id="play" class="PB-control-icon" :icon="['fas', 'play']" />
+            <font-awesome-icon v-if="isPlay" @click="pause" id="pause" class="PB-control-icon"
+              :icon="['fas', 'pause']" />
+            <font-awesome-icon id="forward" class="PB-control-icon" :icon="['fas', 'forward']" />
+            </div>
 
-        <audio ref="audioElement" :poster="musicInfo.picUrl + '?param=400y400'" style="display:block;" autoplay :src="
-            `https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
-          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate" @seeked="setBufferedHandle" />
+            <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
+              <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}">
+                <div class="ball"></div>
+              </div>
+              <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
+            </div>
+
+            <audio ref="audioElement" style="display:block;" :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
+          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
+              @seeked="setBufferedHandle" />
+          </div>
+        
       </div>
     </div>
   </div>
@@ -63,11 +62,11 @@
         isShow: false,
         hash: "",
         audioElement: "",
-        currentTime:0,
-        totalTime:0,
-        progressBarWidth:0,
-        bufferedWidth:0,
-        fastForwardPoint:0
+        currentTime: 0,
+        totalTime: 0,
+        progressBarWidth: 0,
+        bufferedWidth: 0,
+        fastForwardPoint: 0
       };
     },
     methods: {
@@ -87,42 +86,40 @@
         // this.fastForward();
 
       },
-      fastForward(e){
-        let flag = true;
+      fastForward(e) {
         let progressBarWrapOffsetWidth = e.target.offsetWidth;
-        let jumpPoint = parseInt((e.offsetX/progressBarWrapOffsetWidth)*100);
+        let jumpPoint = parseInt((e.offsetX / progressBarWrapOffsetWidth) * 100);
         let mouseX = 0;
-        this.audioElement.currentTime = Math.floor((jumpPoint / 100)*this.audioElement.duration);
+        this.audioElement.currentTime = Math.floor((jumpPoint / 100) * this.audioElement.duration);
 
-          document.onmousemove = (ev)=>{
-            mouseX = ev.offsetX;
-            if (mouseX<progressBarWrapOffsetWidth) {
-              mouseX = parseInt((mouseX/progressBarWrapOffsetWidth)*100)
-              
-            }else{
-              mouseX = 100;
-            }
-            if(mouseX<0){
-              mouseX=0;
-            }
-            console.log(mouseX);
-            this.audioElement.currentTime = Math.floor((mouseX / 100)*this.audioElement.duration);
+        document.onmousemove = (ev) => {
+          mouseX = ev.offsetX;
+          if (mouseX < progressBarWrapOffsetWidth) {
+            mouseX = parseInt((mouseX / progressBarWrapOffsetWidth) * 100)
+
+          } else {
+            mouseX = 100;
           }
-            document.onmouseup=()=>{
-              document.onmousemove = null;
-            }
-          console.log(jumpPoint);
+          if (mouseX < 0) {
+            mouseX = 0;
+          }
+          // console.log(mouseX);
+          this.audioElement.currentTime = Math.floor((mouseX / 100) * this.audioElement.duration);
+        }
+        document.onmouseup = () => {
+          document.onmousemove = null;
+        }
+        // console.log(jumpPoint);
         // console.log(this.fastForwardPoint);
-      }
-      ,
-      setBufferedHandle(){
+      },
+      setBufferedHandle() {
         let currentTime = parseInt(this.audioElement.currentTime);
         let duration = this.audioElement.duration;
         let timeRanges = this.audioElement.buffered;
-        let time = 0 ;
-        if(currentTime!==Number(time)){
+        let time = 0;
+        if (currentTime !== Number(time)) {
           time = currentTime;
-          this.bufferedWidth = parseInt(timeRanges.end(timeRanges.length-1)*100/duration*100)/100;
+          this.bufferedWidth = parseInt(timeRanges.end(timeRanges.length - 1) * 100 / duration * 100) / 100;
           // console.log(this.bufferedWidth);
         }
       },
@@ -130,7 +127,7 @@
         this.axios.get("/personalized/newsong?limit=10").then((re) => {
           let data = re.data.result[0];
           //计算总时间
-          let duration = parseInt(data.song.duration/1000);
+          let duration = parseInt(data.song.duration / 1000);
           let totalTime = util.playTimeFormat(duration)
 
           // console.log(data);
@@ -144,14 +141,14 @@
             albumID: data.song.album.id,
             duration: data.song.duration,
             picUrl: data.picUrl,
-            totalTime:totalTime
+            totalTime: totalTime
           });
           document.title = `${data.name} - ${data.song.artists[0].name}`;
           this.$store.commit("getMusicInfo", MusicInfo);
           // console.log(MusicInfo);
           util.mediaMetaDataHandle(MusicInfo);
           // 获取时间
-          
+
         });
 
       },
@@ -169,6 +166,7 @@
       },
       audioControls() {
         this.audioElement = this.$refs.audioElement;
+        this.$store.commit('getAudioElement', this.audioElement)
       },
       play() {
         let isplay = this.$store.state.isPlay;
@@ -221,15 +219,186 @@
       ...mapState(["musicInfo"]),
       ...mapState(["musicList"]),
       ...mapState(["isPlay"]),
-      
+
       // getMusicCurrentTime(time){
-        
+
       // },
     },
   };
 </script>
 
 <style>
+
+
+  #app .play-button-control .PB-control-icon {
+    margin-left: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    transition: color 0.2s ease-in;
+  }
+
+  .PB-control-icon:hover {
+    color: #fff;
+  }
+
+  #app {
+    width: 100%;
+    height: 100%;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    ;
+    /* color: #2c3e50; */
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    background-size: cover;
+  }
+
+  .bg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    filter: blur(10px);
+    z-index: -1;
+  }
+
+  #app .play-mini {
+    bottom: 0;
+    width: 100vw;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding:10px 0 0 10px;
+    box-sizing: border-box;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.60);
+  }
+
+  #app .play-mini .bottom-panel {
+    flex:5;
+    top: -5px;
+    width: 96%;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    /* border: 1px solid red; */
+  }
+
+  #app .play-mini .music-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    width: 60%;
+    text-align: left;
+    margin-bottom: 5px;
+    position: relative;
+    font-weight: bold;
+    margin: 0 50px;
+  }
+    #app .play-mini .music-info .music-time {
+    position: absolute;
+    right: 0;
+  }
+
+  #app .play-mini .play-button-control {
+    width: 200px;
+  }
+
+  #app .play-mini .music-info span:last-child {
+    margin-left: 10px;
+  }
+
+
+  /* 播放进度条 */
+  .progress-bar-wrap {
+    width: 54%;
+    height: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .progress-bar-wrap::before {
+    content: '';
+    display: block;
+    height: 10px;
+    width: 100%;
+    border-radius: 10px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #ffffff9a;
+  }
+
+  .progress-bar-wrap .progress-bar,
+  .progress-bar-wrap .buffer-bar {
+    height: 10px;
+    width: 60%;
+    border-radius: 10px;
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+
+  }
+
+  .progress-bar-wrap .progress-bar {
+    background-color: rgb(0, 161, 214);
+    z-index: 2;
+  }
+
+  .progress-bar-wrap:hover .ball {
+    opacity: 1 !important;
+  }
+
+  .progress-bar-wrap .progress-bar .ball {
+    /* box-sizing: border-box; */
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid skyblue;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
+    background-color: white;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .progress-bar-wrap .buffer-bar {
+    width: 10%;
+    background-color: #717171;
+    z-index: 1;
+  }
+
+  #app .viws {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 90px);
+    background-color: rgba(0, 0, 0, 0.5);
+
+    width: 100vw;
+    z-index: 1;
+  }
+
+  #app .viws>div {
+    flex: 1;
+  }
+
+  .viws-wrap {
+    display: flex;
+    flex-direction: column;
+  }
   body {
     background-color: rgb(63, 63, 63);
     color: rgba(255, 255, 255, 0.67);
@@ -266,165 +435,5 @@
     position: relative;
     top: 12px;
     color: rgba(255, 255, 255, 0.5);
-  }
-
-
-  #app .play-mini .play-button-control .PB-control-icon {
-    margin-left: 20px;
-    font-size: 30px;
-    cursor: pointer;
-    transition: color 0.2s ease-in;
-  }
-  .PB-control-icon:hover{
-    color: #fff;
-  }
-  #app {
-    width: 100%;
-    height: 100%;
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    ;
-    /* color: #2c3e50; */
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    background-size: cover;
-  }
-
-  .bg {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    filter: blur(10px);
-    background: url("./assets/IMG_20200311_224837.jpg") center no-repeat;
-    z-index: -1;
-  }
-  #app .play-mini {
-    /* position: absolute; */
-    bottom: 0;
-    width: 100vw;
-    height: 90px;
-    display: flex;
-    /* flex-direction: column; */
-    /* justify-content: center; */
-    align-items: center;
-    z-index: 2;
-    background-color: rgba(0, 0, 0, 0.60);
-  }
-#app .play-mini .middle-panel{
-  flex: 6;
-  height: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-}
-#app .play-mini .middle-panel .music-info{
-  display: flex;
-  align-items: center;
-}
-#app .play-mini .right-panel{
-  flex: 4;
-}
-  #app .play-mini .play-button-control {
-    width: 150px;
-  }
-
-  #app .play-mini .music-info {
-    width: auto;
-    text-align: left;
-    margin-bottom: 5px;
-    position: relative;
-    font-weight: bold;
-  }
-  #app .play-mini .music-info span:last-child{
-    margin-left: 10px;
-  }
-  #app .play-mini .music-info .music-time{
-    position: absolute;
-    right: 0;
-  }
-  /* 播放进度条 */
-  .progress-bar-wrap{
-    /* padding: 10px; */
-    width: 100%;
-    height: 20px;
-    position: relative;
-    overflow: hidden;
-    user-select: none;
-    /* background-color: blanchedalmond; */
-  }
-  .progress-bar-wrap::before{
-    content: '';
-    display: block;
-    height: 10px;
-    width: 100%;
-    border-radius: 10px;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #ffffff9a;
-  }
-.progress-bar-wrap .progress-bar , .progress-bar-wrap .buffer-bar{
-  height: 10px;
-  width: 60%;
-  border-radius: 10px;
-  box-sizing: border-box;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 0;
-  
-}
-.progress-bar-wrap .progress-bar{
-  background-color: rgb(0, 161, 214);
-  z-index: 2;
-}
-.progress-bar-wrap:hover .ball{
-  opacity: 1 !important;
-}
-.progress-bar-wrap .progress-bar .ball{
-  /* box-sizing: border-box; */
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  border: 1px solid skyblue;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 0;
-  background-color: white;
-  opacity: 0;
-  transition: opacity 0.5s;
-}
-.progress-bar-wrap .buffer-bar{
-  width: 10%;
-  background-color: #717171;
-  z-index: 1;
-}
-    #app .viws {
-    display: flex;
-    flex-direction: row;
-    height: calc(100vh - 90px);
-    background-color: rgba(0, 0, 0, 0.5);
-    /* height: 100vh; */
-    width: 100vw;
-    z-index: 1;
-  }
-
-  #app .viws>div {
-    flex: 1;
-    /* height: calc(100vh - 90px); */
-  }
-  
-  .viws-wrap {
-    display: flex;
-    flex-direction: column;
-    /* justify-content: center;
-  align-items: center; */
   }
 </style>

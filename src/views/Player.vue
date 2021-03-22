@@ -8,7 +8,9 @@
       <h3 class="artist">《{{ musicInfo.album }}》</h3>
       <h3 class="album">{{ musicInfo.artist }}</h3>
     </div>
+    <div class="lyricView">
     <lyricView></lyricView>
+    </div>
   </div>
 </template>
 <script>
@@ -36,6 +38,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1.8;
 }
 h2 {
   /*  */
@@ -43,35 +46,19 @@ h2 {
   white-space: nowrap;
   overflow-x: auto;
 }
-h2::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-  border-radius: 5px;
-  background-color: #f5f5f5;
-}
-h2::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  background-color: #f5f5f5;
-}
-h2::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  background-color: #555;
-  cursor: pointer;
-}
+
 .player {
   display: flex;
   /* justify-content: center; */
   align-items: center;
   flex-direction: column;
+  height: 100%;
 }
 .cover {
   position: relative;
   margin: 50px 0 50px 0;
   width: 320px;
   height: 320px;
-  background: url("../assets/IMG_20200311_224837.jpg") center;
   background-size: cover;
   overflow: hidden;
   border-radius: 50%;
@@ -81,7 +68,10 @@ h2::-webkit-scrollbar-thumb {
   width: 100%;
   height: 100%;
   /* border-radius: 50%; */
-  
+  vertical-align: m;
 }
-
+.lyricView{
+  flex: 1;
+  /* background-color: azure; */
+}
 </style>
