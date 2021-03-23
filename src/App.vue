@@ -29,20 +29,31 @@
             <font-awesome-icon v-if="isPlay" @click="pause" id="pause" class="PB-control-icon"
               :icon="['fas', 'pause']" />
             <font-awesome-icon id="forward" class="PB-control-icon" :icon="['fas', 'forward']" />
-            </div>
-
-            <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
-              <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}">
-                <div class="ball"></div>
-              </div>
-              <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
-            </div>
-
-            <audio ref="audioElement" style="display:block;" :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
-          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
-              @seeked="setBufferedHandle" />
           </div>
-        
+
+          <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
+            <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}">
+              <div class="ball"></div>
+            </div>
+            <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
+          </div>
+
+          <div>
+            <div class="volume-wrap"  @mouseleave="volumeShow=false">
+              <div class="volume" v-show="volumeShow">
+                {{parseInt(volumeValues)}}
+              <input type="range" max="100" :value="volumeValues" class="range" @mousedown="volumeHandle" ref="volume">
+                
+                </div>              
+              <font-awesome-icon @mouseenter="volumeShow=true" class="volume-icon" :icon="['fas','volume-up']" />
+            </div>
+          </div>
+          <audio ref="audioElement" style="display:block;" autoplay :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
+          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
+            @seeked="setBufferedHandle" />
+
+        </div>
+
       </div>
     </div>
   </div>
@@ -66,10 +77,28 @@
         totalTime: 0,
         progressBarWidth: 0,
         bufferedWidth: 0,
-        fastForwardPoint: 0
+        fastForwardPoint: 0,
+        volumeShow: false,
+        volumeValues:0,
       };
     },
     methods: {
+      // 调解音量
+      volumeHandle(){   
+        let volumeValue = this.$refs.volume.value;
+        this.audioElement.volume = volumeValue/100;
+        this.volumeValues = this.audioElement.volume*100;
+        document.onmousemove = () =>{
+          volumeValue = this.$refs.volume.value;
+          this.audioElement.volume = volumeValue/100;
+          this.volumeValues = this.audioElement.volume*100;
+        }
+        // 解绑
+        document.onmouseup = ()=>{
+          document.onmousemove = null;
+        }
+        
+      },
       audioTimeUpdate() {
         //获取当前播放时间
         let currentTime = parseInt(this.audioElement.currentTime);
@@ -89,6 +118,7 @@
       fastForward(e) {
         let progressBarWrapOffsetWidth = e.target.offsetWidth;
         let jumpPoint = parseInt((e.offsetX / progressBarWrapOffsetWidth) * 100);
+        console.log(e.offsetX,progressBarWrapOffsetWidth);
         let mouseX = 0;
         this.audioElement.currentTime = Math.floor((jumpPoint / 100) * this.audioElement.duration);
 
@@ -166,7 +196,8 @@
       },
       audioControls() {
         this.audioElement = this.$refs.audioElement;
-        this.$store.commit('getAudioElement', this.audioElement)
+        this.$store.commit('getAudioElement', this.audioElement);
+        this.volumeHeight = (this.audioElement.volume*100).toFixed(2);
       },
       play() {
         let isplay = this.$store.state.isPlay;
@@ -209,11 +240,15 @@
     },
     mounted() {
       this.audioControls();
+      this.volumeValues = this.audioElement.volume*100;
 
 
     },
     created() {
       this.recommMusic();
+      this.axios.get('/toplist').then(re=>{
+        console.log(re);
+      })
     },
     computed: {
       ...mapState(["musicInfo"]),
@@ -228,6 +263,42 @@
 </script>
 
 <style>
+.volume-wrap .volume{
+  position: absolute;
+  height: 125px;
+  width: 45px;
+  left: -10px;
+  top: -50px;
+  padding: 10px 0 0 0;
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 15px;
+  background-color: rgba(255, 255, 255, 0.418);
+}
+.volume-wrap .volume .range{
+  display: inline-block;
+  width: 90px;
+  left: -23px;
+  top: 70px;
+  position: absolute;
+  transform:rotateZ(270deg);
+  cursor: pointer;
+  
+}
+  .volume-wrap {
+    height: 110px;
+    width: 30px;
+    position: relative;
+    top: -50px;
+    margin-left: 10px;
+  }
+
+  .volume-wrap .volume-icon {
+    font-size: 20px;
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    transform: translateX(-50%);
+  }
 
 
   #app .play-button-control .PB-control-icon {
@@ -273,16 +344,18 @@
     width: 100vw;
     height: 90px;
     display: flex;
+    position: relative;
     flex-direction: column;
     justify-content: center;
-    padding:10px 0 0 10px;
+    padding: 10px 0 0 10px;
     box-sizing: border-box;
     z-index: 2;
     background-color: rgba(0, 0, 0, 0.60);
   }
 
   #app .play-mini .bottom-panel {
-    flex:5;
+    /* flex: 1; */
+    height: 60px;
     top: -5px;
     width: 96%;
     position: relative;
@@ -293,17 +366,19 @@
   }
 
   #app .play-mini .music-info {
-    flex: 1;
     display: flex;
     align-items: center;
     width: 60%;
+    height: 30px;
     text-align: left;
     margin-bottom: 5px;
     position: relative;
     font-weight: bold;
     margin: 0 50px;
+    /* border: 1px solid red; */
   }
-    #app .play-mini .music-info .music-time {
+
+  #app .play-mini .music-info .music-time {
     position: absolute;
     right: 0;
   }
@@ -335,7 +410,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: #ffffff9a;
+    background-color: rgba(255, 255, 255, 0.604);
   }
 
   .progress-bar-wrap .progress-bar,
@@ -399,6 +474,7 @@
     display: flex;
     flex-direction: column;
   }
+
   body {
     background-color: rgb(63, 63, 63);
     color: rgba(255, 255, 255, 0.67);

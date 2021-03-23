@@ -59,7 +59,8 @@ import { mapState } from 'vuex';
                 this.liTop = -lyricLi[i].offsetTop + 122.5;
                 // 开发的时候热重载保存后这条会报 offsetTop of undefined.....
               }catch(e){
-                console.log(e);
+                let error = e;
+                
               }
               break;
             }

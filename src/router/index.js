@@ -41,7 +41,11 @@ const routes = [{
     //   path: '/players',
     //   component: () => import('../views/Player.vue'),
     // }]
-  },
+  }, {
+    path: '/rank',
+    name: 'RankList',
+    component: () => import('../views/RankList.vue')
+  }
 ]
 
 const router = new VueRouter({

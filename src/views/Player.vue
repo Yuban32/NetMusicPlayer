@@ -16,7 +16,7 @@
 <script>
 // import { mapMutations } from 'vuex'
 import { mapState } from "vuex";
-import lyricView from '@/views/LyricView'
+import lyricView from '@/components/LyricView'
 export default {
   name: "Player",
   data() {
