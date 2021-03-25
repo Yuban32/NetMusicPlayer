@@ -2,13 +2,13 @@
     <div class="albumDetail">
       <div class="description">
         <div class="coverPic">
-          <img :src="albumDetail.coverImgUrl" />
+          <img :src="albumDetailData[0].coverImgUrl" />
         </div>
         <div class="infosWrap">
           <div class="infos">
-            <h2 class="infosTitle">{{ albumDetail.name }}</h2>
-            <p>By:{{ albumDetail.creator.nickname }}</p>
-            <p>{{ albumDetail.description }}</p>
+            <h2 class="infosTitle">{{ albumDetailData[0].albumName }}</h2>
+            <p>By:{{ albumDetailData[0].creatorName }}</p>
+            <p>{{ albumDetailData[0].description }}</p>
           </div>
 
           <span class="addAll">
@@ -22,7 +22,7 @@
       </div>
       <!-- 渲染出来的歌单详细数据 -->
       <ul>
-        <li v-for="(item, index) in albumDetail.tracks" :key="index">
+        <li v-for="(item, index) in albumList" :key="index">
           <div class="container">
             <span class="order">{{ index + 1 }}</span>
             <img
@@ -52,7 +52,7 @@
           </div>
         </li>
       </ul>
-      <div class="backForwardWrap" @click="sendBack">
+      <div class="backForwardWrap" @click="sendBack" v-if="backForwardShow">
         <font-awesome-icon class="backForward" :icon="['fas', 'chevron-left']"
           >BACK</font-awesome-icon
         >
@@ -68,7 +68,7 @@ export default {
         return{
             showAlbums:false
         }
-    },props:['albumDetail'],
+    },props:['albumDetailData','albumList','backForwardShow'],
     methods:{
         sendBack(){
             this.$emit('showAlbum',this.showAlbums);
@@ -130,24 +130,34 @@ util.mediaMetaDataHandle(MusicInfo);
     height: 210px;
   }
 }
+li{
+  overflow: hidden;
+}
 .container {
   width: 100%;
-  height: 50px;
+  height: 70px;
   display: flex;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   box-sizing: border-box;
   line-height: 50px;
-
   user-select: none;
   overflow: hidden;
   padding-top: 2px;
   position: relative;
+  transition: all 0.2s;
+  
 }
 .container:hover .PBList {
   bottom: 5px;
 }
+.container:hover{
+  transform: translateX(54px) scale(1.2)
+
+}
 .musicTitle {
-  line-height: 20px;
+  line-height: 35px;
+  padding-left: 10px;
+  transition: all 0.2s;
 }
 .coverPic img {
   height: 100px;
@@ -157,7 +167,7 @@ util.mediaMetaDataHandle(MusicInfo);
 .PBList {
   position: absolute;
   bottom: -20px;
-  left: 120px;
+  left: 180px;
   cursor: pointer;
   transition: all 0.2s ease-in;
 }
@@ -192,6 +202,7 @@ util.mediaMetaDataHandle(MusicInfo);
 }
 .infosWrap {
   height: 130px;
+  text-align: left;
 }
 .infos {
   width: 75%;

@@ -9,7 +9,7 @@
     ></list>
 
     <!-- 详情 -->
-    <albumDetail v-if="showAlbum" :albumDetail="albumDetail" @showAlbum="showAlbumHandle"></albumDetail>
+    <albumDetail v-if="showAlbum" :backForwardShow="true" :albumList='albumList' :albumDetailData="albumDetail" @showAlbum="showAlbumHandle"></albumDetail>
   </div>
 </template>
 <script>
@@ -35,12 +35,18 @@ export default {
       this.axios
         .get("/playlist/detail/dynamic?id=" + id)
         .then((result) => {
-          this.albumDetail = result.data.playlist;
-          // console.log(this.albumDetail);
+          let data = result.data.playlist
+          this.albumDetail = [];
+          this.albumDetail.push({
+              coverImgUrl:data.coverImgUrl,
+              albumName:data.name,
+              description:data.description,
+              creatorName:data.creator.nickname
+          });
+          this.albumList = result.data.playlist.tracks
           this.showAlbum = true;
         })
         .catch((err) => {});
-      // console.log(this.albumDetail);
     },
     
   },

@@ -6,7 +6,7 @@
     <navigattion />
     <div class="viws-wrap">
       <div class="viws">
-        <player v-if="isShow"></player>
+        <player v-if="playViewShow"></player>
         <transition @before-enter="isShowFN()">
           <router-view />
         </transition>
@@ -14,7 +14,7 @@
       <div class="play-mini">
         <div class="music-info">
           <div class="music-title">
-            <span>{{ musicInfo.musicName }}</span>
+            <span @click="playShowHandle">{{ musicInfo.musicName }}</span>
             <span>{{ musicInfo.artist }}</span>
           </div>
           <div class="music-time">
@@ -83,6 +83,10 @@
       };
     },
     methods: {
+      // 是否显示播放界面
+      playShowHandle(){
+        this.$store.commit('setPlayViewShow',true);
+      },
       // 调解音量
       volumeHandle(){   
         let volumeValue = this.$refs.volume.value;
@@ -225,7 +229,7 @@
       isShowFN() {
         const urlHash = {
           "#/search": true,
-          "#/recom": true
+          "#/recom": true,
         };
         const {
           hash
@@ -246,14 +250,14 @@
     },
     created() {
       this.recommMusic();
-      this.axios.get('/toplist').then(re=>{
-        console.log(re);
-      })
     },
     computed: {
       ...mapState(["musicInfo"]),
       ...mapState(["musicList"]),
       ...mapState(["isPlay"]),
+      ...mapState({
+        playViewShow:state=>state.playViewShow
+      })
 
       // getMusicCurrentTime(time){
 
@@ -289,7 +293,7 @@
     width: 30px;
     position: relative;
     top: -50px;
-    margin-left: 10px;
+    margin-left: 30px;
   }
 
   .volume-wrap .volume-icon {
@@ -377,7 +381,11 @@
     margin: 0 50px;
     /* border: 1px solid red; */
   }
-
+  #app .play-mini .music-info .music-title{
+    cursor: pointer;
+    user-select: none;
+    text-decoration: underline;
+  }
   #app .play-mini .music-info .music-time {
     position: absolute;
     right: 0;
@@ -502,7 +510,7 @@
 
   .order {
     display: inline-block;
-    min-width: 60px;
+    min-width: 90px;
     padding: 0 5px 0 5px;
     width: auto;
     font-size: 50px;

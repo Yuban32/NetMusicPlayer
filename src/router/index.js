@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 Vue.use(VueRouter)
 
 const routes = [{
     path: '/recom',
     name: 'Recom',
+    meta: {
+      show: true
+    },
     component: () => import('../views/Recommend.vue')
   },
   {
@@ -34,13 +36,10 @@ const routes = [{
     path: '/search',
     name: 'Search',
     meta: {
-      keepAlive: true
+      show: true
     },
     component: () => import('../views/Search.vue'),
-    // children: [{
-    //   path: '/players',
-    //   component: () => import('../views/Player.vue'),
-    // }]
+
   }, {
     path: '/rank',
     name: 'RankList',
@@ -53,5 +52,19 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+router.beforeEach((to, from, next) => {
+  // 注册一个全局守卫,检测到某个路由显示播放页面
+  let prevRoute = to.meta.show;
+  if (prevRoute) {
+    router.app.$options.store.commit('setPlayViewShow', true)
+  } else {
+    router.app.$options.store.commit('setPlayViewShow', false)
+  }
+  // router.app.$options.store.dispatch('setPlayShow', true).then((i) => {
+  //   console.log(i);
+  // })
 
+  next();
+  // console.log(prevRoute);
+})
 export default router

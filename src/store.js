@@ -23,6 +23,7 @@ export default new Vuex.Store({
         isPlay: false,
         recommAlbumList: [],
         audioElement: null,
+        playViewShow: false,
     },
     mutations: {
         getMusicInfo(state, MusicInfo) {
@@ -53,9 +54,10 @@ export default new Vuex.Store({
         getAudioElement(state, element) {
             state.audioElement = element;
             // console.log(element);
+        },
+        setPlayViewShow(state, stpe) {
+            state.playViewShow = stpe;
+            // console.log(stpe);
         }
     },
-    actions: {
-
-    }
 })

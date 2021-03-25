@@ -36,7 +36,6 @@ import { mapState } from 'vuex';
         this.axios.get('/lyric?id='+this.musicID).then(re => {
           this.lyric = re.data.lrc.lyric;
         }).catch(erorr => {
-          console.log(erorr);
         })
         
       },
@@ -89,9 +88,13 @@ import { mapState } from 'vuex';
         return lcArray;
       },
     },
-    created() {
+    mounted() {
       this.getLyric();
-      this.lyricHandle()
+      try{
+        this.lyricHandle()
+      }catch(e){
+        let error = e;
+      }
     }
   }
 </script>
