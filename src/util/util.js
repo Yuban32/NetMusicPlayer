@@ -28,6 +28,10 @@ class Util {
         return `${minutes} : ${seconds}`
 
     }
+    unique(arr) {
+        const res = new Map();
+        return arr.filter((arr) => !res.has(arr.musicID) && res.set(arr.musicID, 1))
+    }
 
 }
 

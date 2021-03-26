@@ -106,6 +106,7 @@ import { mapState } from 'vuex';
 
   ul {
     transition: all 0.5s;
+    height: 100%;
   }
   li{
     color: rgba(255, 255, 255, 0.5);
@@ -119,4 +120,7 @@ import { mapState } from 'vuex';
     margin: 0 auto;
     /* background-color: bisque; */
   }
+  @media screen and (max-height:750px) {
+
+}
 </style>

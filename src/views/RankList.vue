@@ -4,8 +4,9 @@
             <div class="netease-rank">
                 <rank-list-title :title="'网易云音乐榜'"></rank-list-title>
                 <div class="card-wrap">
-                    <card-img v-for=" item  in neteaseSpecialRankList" :key="item.id" :background="item.coverImgUrl"
-                        :title="item.name" :hot="playCountFormat(item.playCount)" @click.native="showRankListDetail(item)"></card-img>
+                    <card-img v-for=" item  in neteaseSpecialRankList" :key="item.id"
+                        :background="item.coverImgUrl+'?param=200y200'" :title="item.name"
+                        :hot="playCountFormat(item.playCount)" @click.native="showRankListDetail(item)"></card-img>
                 </div>
             </div>
             <div class="global-rank">
@@ -19,50 +20,69 @@
         </div>
         <div class="showDetail">
             {{albumShow?'':noData}}
-            <albumDetail v-if="albumShow" :albumDetailData="albumDetailData" :albumList="albumList"></albumDetail>
-            </div>
+            <albumDetail v-if="albumShow" :albumDetailData="albumDetailData" :albumList="albumList"
+                :backForwardShow="playViewShow" @showAlbum="playShowHandle"></albumDetail>
+        </div>
     </div>
 </template>
 <script>
     import cardImg from '@/components/Card-img'
     import RankListTitle from '../components/Rank-list-title.vue';
     import AlbumDetail from '@/components/AlbumDetail'
-import { mapState } from 'vuex';
+    import {
+        mapState
+    } from 'vuex';
     export default {
         data() {
             return {
                 neteaseSpecialRankList: [],
                 globalRankList: [],
-                albumDetailData:[],
-                albumList:[],
-                albumShow:false,
-                noData:'先点击左边的榜单才能看到详情哦~'
+                albumDetailData: [],
+                albumList: [],
+                albumShow: false,
+                noData: '正在努力加载歌单信息~',
+                backForwardShow: false
             }
         },
         methods: {
-            showRankListDetail(item){
+            playShowHandle() {
+                this.$store.commit('setPlayViewShow', false);
+            },
+            showRankListDetail(item) {
                 let id = null;
-                if(!item){
-                    id=19723756;
-                }else{
+                if (!item) {
+                    id = 19723756;
+                } else {
                     id = item.id
                 }
                 // console.log(item);
-                this.axios.get("/playlist/detail/dynamic?id="+id).then(re=>{
+                this.axios.get("/playlist/detail/dynamic?id=" + id).then(re => {
                     let data = re.data.playlist
                     this.albumDetailData = [];
                     this.albumDetailData.push({
-                        coverImgUrl:data.coverImgUrl,
-                        albumName:data.name,
-                        description:data.description,
-                        creatorName:data.creator.nickname
+                        coverImgUrl: data.coverImgUrl,
+                        albumName: data.name,
+                        description: data.description,
+                        creatorName: data.creator.nickname
                     });
-                    this.albumList = data.tracks
-                    // console.log(this.albumDetailData);
-                    // console.log(this.albumList);
+                    // console.log(data.tracks);
+                    this.albumList = [];
+                    data.tracks.forEach(item => {
+                        // console.log(item.id,item.name,item.ar[0].name,item.ar[0].id,item.al.name,item.al.id,item.dt,item.al.picUrl,);
+                        this.albumList.push({
+                            musicID: item.id,
+                            musicName: item.name,
+                            artist: item.ar[0].name,
+                            artistID: item.ar[0].id,
+                            album: item.al.name,
+                            albumID: item.al.id,
+                            duration: item.dt,
+                            picUrl: item.al.picUrl,
+                        })
+                    })
                     this.albumShow = true;
-            })
-                
+                })
+
             },
             playCountFormat(num) {
                 let playCount = Number(num);
@@ -77,8 +97,8 @@ import { mapState } from 'vuex';
         },
         components: {
             'card-img': cardImg,
-            'albumDetail':AlbumDetail,
-            'rankListTitle':RankListTitle
+            'albumDetail': AlbumDetail,
+            'rankListTitle': RankListTitle
         },
         mounted() {
             // 初始化榜单数据
@@ -94,14 +114,17 @@ import { mapState } from 'vuex';
                 });
             });
             this.showRankListDetail();
-            
-        },computed:{
+
+        },
+        computed: {
             // 动态获取vuex里的指定数据
             ...mapState({
-                playViewShow:state=>state.playViewShow
+                playViewShow: state => state.playViewShow
             }),
-        },watch:{
-            playViewShow(val,old){
+        },
+        watch: {
+            playViewShow(val, old) {
+                this.backForwardShow = val;
                 return val
             }
         }
@@ -109,10 +132,10 @@ import { mapState } from 'vuex';
 </script>
 <style scoped>
     .rank-list {
-        overflow:hidden;
+        overflow: hidden;
         display: flex;
         position: relative;
-        
+
     }
 
     .card-wrap {
@@ -130,20 +153,35 @@ import { mapState } from 'vuex';
     .card-img-wrap {
         margin: 15px;
     }
-    .rank-wrap{
+
+    .rank-wrap {
         flex: 1;
         overflow-y: auto;
     }
+
     /* 详细歌单 */
-    .showDetail{
+    .showDetail {
         flex: 1;
+        width: 50%;
         height: calc(100vh - 90px);
         border-left: 1px solid rgba(255, 255, 255, 0.2);
         background: rgba(0, 0, 0, 0.3);
-        overflow: auto;
+        overflow-x: hidden;
+        content-visibility: auto;
+        position: relative;
     }
-    .netease-rank, .global-rank{
+
+    .netease-rank,
+    .global-rank {
         padding-top: 50px;
     }
-    
+
+    .albumDetail /deep/ .backForwardWrap {
+        bottom: 0px;
+        right: -35px;
+    }
+
+    .albumDetail /deep/ .backForwardWrap:hover {
+        right: 65px;
+    }
 </style>

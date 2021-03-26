@@ -37,6 +37,7 @@ export default {
         .catch((err) => {});
     },
     sendID(id) {
+      // console.log(id);
       this.$emit("getMusicID", id);
     },
   },

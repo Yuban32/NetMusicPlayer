@@ -24,11 +24,11 @@
 
         <div class="bottom-panel">
           <div class="play-button-control">
-            <font-awesome-icon id="backward" class="PB-control-icon" :icon="['fas', 'backward']" />
+            <font-awesome-icon @click="prevMusicHandle" id="backward" class="PB-control-icon" :icon="['fas', 'backward']" />
             <font-awesome-icon v-if="!isPlay" @click="play" id="play" class="PB-control-icon" :icon="['fas', 'play']" />
             <font-awesome-icon v-if="isPlay" @click="pause" id="pause" class="PB-control-icon"
               :icon="['fas', 'pause']" />
-            <font-awesome-icon id="forward" class="PB-control-icon" :icon="['fas', 'forward']" />
+            <font-awesome-icon @click="nextMusicHandle" id="forward" class="PB-control-icon" :icon="['fas', 'forward']" />
           </div>
 
           <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
@@ -38,15 +38,24 @@
             <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
           </div>
 
-          <div>
-            <div class="volume-wrap"  @mouseleave="volumeShow=false">
+         
+            <div class="volume-wrap" @mouseleave="volumeShow=false">
               <div class="volume" v-show="volumeShow">
                 {{parseInt(volumeValues)}}
-              <input type="range" max="100" :value="volumeValues" class="range" @mousedown="volumeHandle" ref="volume">
-                
-                </div>              
+                <input type="range" max="100" :value="volumeValues" class="range" @mousedown="volumeHandle"
+                  ref="volume">
+              </div>
               <font-awesome-icon @mouseenter="volumeShow=true" class="volume-icon" :icon="['fas','volume-up']" />
             </div>
+
+            <div class="play-list-wrap">
+              <div class="music-list" v-show="listShow">
+                <p v-for="item in musicList" :key="item.musicID" :style="`color:${musicInfo.musicID==item.musicID?'red':''}`">
+                  {{item.musicName}}
+                </p>
+              </div>
+              {{musicList.length}}
+              <font-awesome-icon @click="listShow=!listShow" class="play-list" :icon="['fas','list-ul']" />
           </div>
           <audio ref="audioElement" style="display:block;" autoplay :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
           " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
@@ -79,29 +88,61 @@
         bufferedWidth: 0,
         fastForwardPoint: 0,
         volumeShow: false,
-        volumeValues:0,
+        volumeValues: 0,
+        playIndex:0,
+        listShow:false
       };
     },
     methods: {
+      // 播放列表 测试
+      prevMusicHandle() {
+        let playID = this.$store.state.musicInfo.musicID;
+        console.log(playID);
+        let prevMusic = []
+        let tempList = []
+        this.musicList.filter((item,index)=>{
+          // console.log(item);
+          if(item.musicID==playID){
+            let i = --index;
+            if(i<0) i = this.musicList.length-1;
+            prevMusic[0] = this.musicList[i] 
+            this.$store.commit('getMusicInfo',prevMusic)
+          }
+        });
+
+        // console.log(this.musicList);
+      },
+      nextMusicHandle(){
+        let playID = this.$store.state.musicInfo.musicID;
+        let nextMusic = [];
+        this.musicList.filter((item,index)=>{
+          if(item.musicID==playID){
+            let i = ++index;
+            if(i>this.musicList.length-1) i = 0;
+            nextMusic[0] = this.musicList[i];
+            this.$store.commit('getMusicInfo',nextMusic)
+          }
+        })
+      },
       // 是否显示播放界面
-      playShowHandle(){
-        this.$store.commit('setPlayViewShow',true);
+      playShowHandle() {
+        this.$store.commit('setPlayViewShow', true);
       },
       // 调解音量
-      volumeHandle(){   
+      volumeHandle() {
         let volumeValue = this.$refs.volume.value;
-        this.audioElement.volume = volumeValue/100;
-        this.volumeValues = this.audioElement.volume*100;
-        document.onmousemove = () =>{
+        this.audioElement.volume = volumeValue / 100;
+        this.volumeValues = this.audioElement.volume * 100;
+        document.onmousemove = () => {
           volumeValue = this.$refs.volume.value;
-          this.audioElement.volume = volumeValue/100;
-          this.volumeValues = this.audioElement.volume*100;
+          this.audioElement.volume = volumeValue / 100;
+          this.volumeValues = this.audioElement.volume * 100;
         }
         // 解绑
-        document.onmouseup = ()=>{
+        document.onmouseup = () => {
           document.onmousemove = null;
         }
-        
+
       },
       audioTimeUpdate() {
         //获取当前播放时间
@@ -122,7 +163,7 @@
       fastForward(e) {
         let progressBarWrapOffsetWidth = e.target.offsetWidth;
         let jumpPoint = parseInt((e.offsetX / progressBarWrapOffsetWidth) * 100);
-        console.log(e.offsetX,progressBarWrapOffsetWidth);
+        console.log(e.offsetX, progressBarWrapOffsetWidth);
         let mouseX = 0;
         this.audioElement.currentTime = Math.floor((jumpPoint / 100) * this.audioElement.duration);
 
@@ -201,7 +242,7 @@
       audioControls() {
         this.audioElement = this.$refs.audioElement;
         this.$store.commit('getAudioElement', this.audioElement);
-        this.volumeHeight = (this.audioElement.volume*100).toFixed(2);
+        this.volumeHeight = (this.audioElement.volume * 100).toFixed(2);
       },
       play() {
         let isplay = this.$store.state.isPlay;
@@ -244,7 +285,7 @@
     },
     mounted() {
       this.audioControls();
-      this.volumeValues = this.audioElement.volume*100;
+      this.volumeValues = this.audioElement.volume * 100;
 
 
     },
@@ -256,38 +297,67 @@
       ...mapState(["musicList"]),
       ...mapState(["isPlay"]),
       ...mapState({
-        playViewShow:state=>state.playViewShow
+        playViewShow: state => state.playViewShow,
+        musicList: state => state.musicList
       })
 
       // getMusicCurrentTime(time){
 
       // },
     },
+    watch: {
+      musicList(val, old) {
+        // console.log(val);
+        // this.playList()
+        return val;
+      }
+    }
   };
 </script>
 
 <style>
-.volume-wrap .volume{
-  position: absolute;
-  height: 125px;
-  width: 45px;
-  left: -10px;
-  top: -50px;
-  padding: 10px 0 0 0;
-  border: 1px solid rgb(255, 255, 255);
-  border-radius: 15px;
-  background-color: rgba(255, 255, 255, 0.418);
+.music-list{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  border: 1px solid red;
+  padding: 10px;
+  background-color: #080808c0;
 }
-.volume-wrap .volume .range{
-  display: inline-block;
-  width: 90px;
-  left: -23px;
-  top: 70px;
-  position: absolute;
-  transform:rotateZ(270deg);
+.play-list-wrap{
+  /* border: 1px solid red; */
+  font-size: 20px;
+  /* padding: 0 0 0 20px; */
+  margin-left: 20px;
   cursor: pointer;
-  
+  transition: color 0.2s;
 }
+.play-list-wrap:hover ,.volume-icon:hover{
+  color: white;
+}
+  .volume-wrap .volume {
+    position: absolute;
+    height: 125px;
+    width: 45px;
+    left: -10px;
+    top: -50px;
+    padding: 10px 0 0 0;
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.418);
+  }
+
+  .volume-wrap .volume .range {
+    display: inline-block;
+    width: 90px;
+    left: -23px;
+    top: 70px;
+    position: absolute;
+    transform: rotateZ(270deg);
+    cursor: pointer;
+
+  }
+
   .volume-wrap {
     height: 110px;
     width: 30px;
@@ -302,6 +372,7 @@
     left: 50%;
     bottom: -5px;
     transform: translateX(-50%);
+    transition: color 0.2s;
   }
 
 
@@ -381,11 +452,13 @@
     margin: 0 50px;
     /* border: 1px solid red; */
   }
-  #app .play-mini .music-info .music-title{
+
+  #app .play-mini .music-info .music-title {
     cursor: pointer;
     user-select: none;
     text-decoration: underline;
   }
+
   #app .play-mini .music-info .music-time {
     position: absolute;
     right: 0;

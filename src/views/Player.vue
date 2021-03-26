@@ -44,6 +44,7 @@ h2 {
   /*  */
   width: 100%;
   white-space: nowrap;
+  overflow-y: hidden;
   overflow-x: auto;
 }
 
@@ -57,21 +58,31 @@ h2 {
 .cover {
   position: relative;
   margin: 50px 0 50px 0;
-  width: 320px;
-  height: 320px;
+  width: auto;
+  min-height: auto;
   background-size: cover;
   overflow: hidden;
   border-radius: 50%;
   border: 2px solid darkgray;
 }
 .cover img {
-  width: 100%;
-  height: 100%;
-  /* border-radius: 50%; */
-  vertical-align: m;
+  width: 320px;
+  height: 320px;
 }
 .lyricView{
   flex: 1;
-  /* background-color: azure; */
+  overflow: hidden;
+}
+
+@media screen and (max-height:750px) {
+  .songInfo{
+    display: none;
+  }
+  .lyricView /deep/ .lyric{
+    height: calc(100% - 90px);
+  }
+  .lyricView{
+    padding: 50px 0 0 0;
+  }
 }
 </style>

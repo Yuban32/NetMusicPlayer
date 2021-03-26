@@ -24,6 +24,8 @@ export default {
         height: 190px;
         width: 150px;
         cursor: pointer;
+        /* css性能优化 跳过屏幕外的内容渲染 */
+        content-visibility: auto; 
     }
     .card-img-wrap .card-img{
         position: relative;

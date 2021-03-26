@@ -2,7 +2,7 @@
     <div class="albumDetail">
       <div class="description">
         <div class="coverPic">
-          <img :src="albumDetailData[0].coverImgUrl" />
+          <img :src="albumDetailData[0].coverImgUrl+'?param=100y100'" />
         </div>
         <div class="infosWrap">
           <div class="infos">
@@ -21,37 +21,8 @@
         </div>
       </div>
       <!-- 渲染出来的歌单详细数据 -->
-      <ul>
-        <li v-for="(item, index) in albumList" :key="index">
-          <div class="container">
-            <span class="order">{{ index + 1 }}</span>
-            <img
-              class="listImg"
-              :src="item.al.picUrl + '?param=45y45'"
-              alt=""
-            />
-            <span class="musicTitle"
-              >{{ item.name }}<span> - {{ item.ar[0].name }}</span></span
-            >
-            <font-awesome-icon
-              @click="
-                play(
-                  item.id,
-                  item.name,
-                  item.ar[0].name,
-                  item.ar[0].id,
-                  item.al.name,
-                  item.al.id,
-                  item.al.picUrl,
-                  item.dt
-                )
-              "
-              class="PBList"
-              :icon="['fas', 'play-circle']"
-            />
-          </div>
-        </li>
-      </ul>
+        <songList :songList="albumList"></songList>
+
       <div class="backForwardWrap" @click="sendBack" v-if="backForwardShow">
         <font-awesome-icon class="backForward" :icon="['fas', 'chevron-left']"
           >BACK</font-awesome-icon
@@ -63,32 +34,21 @@
 
 <script>
 import util from '@/util/util'
+import SongList from '@/components/SongList'
 export default {
     data(){
         return{
-            showAlbums:false
+            showAlbums:false,
+            songList:this.albumList
         }
     },props:['albumDetailData','albumList','backForwardShow'],
     methods:{
         sendBack(){
             this.$emit('showAlbum',this.showAlbums);
-        },play(
-      musicID,
-      musicName,
-      artist,
-      artistID,
-      album,
-      albumID,
-      picUrl,
-      duration
-    ) {
+            // console.log(123);
+        },
+        play(musicID,musicName,artist,artistID,album,albumID,picUrl,duration) {
       let MusicInfo = [];
-      // this.axios.get("/album?id=" + albumID).then((response) => {
-      //   // console.log(response);
-      //   // 获取歌曲的封面
-      //   let picUrl = response.data.album.picUrl;
-      //   this.$store.commit("getPicURL", picUrl);
-      // });
       duration = parseInt(duration/1000);
         let totalTime = util.playTimeFormat(duration)
       MusicInfo.push({
@@ -103,11 +63,15 @@ export default {
         totalTime
       });
       // console.log(musicID);
-util.mediaMetaDataHandle(MusicInfo);
+      util.mediaMetaDataHandle(MusicInfo);
       document.title = `${musicName} - ${artist} - Wick's播放器`;
       this.$store.commit("isPlay", true);
       this.$store.commit("getMusicInfo", MusicInfo);
     },
+    },components:{
+      'songList':SongList
+    },mounted(){
+      // console.log(this.backForwardShow);
     }
 }
 </script>
@@ -132,13 +96,15 @@ util.mediaMetaDataHandle(MusicInfo);
 }
 li{
   overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
 }
 .container {
   width: 100%;
   height: 70px;
   display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-sizing: border-box;
+   /* css性能优化 跳过屏幕外的内容渲染 */
+  content-visibility: auto;
   line-height: 50px;
   user-select: none;
   overflow: hidden;
@@ -148,10 +114,10 @@ li{
   
 }
 .container:hover .PBList {
-  bottom: 5px;
+  bottom: 15px;
 }
 .container:hover{
-  transform: translateX(54px) scale(1.2)
+  transform: translateX(50px) scale(1.2)
 
 }
 .musicTitle {
@@ -174,7 +140,11 @@ li{
 
 
 .albumDetail {
-  position: relative;
+  position: absolute;
+  width: 100%;
+  height: calc(100%);
+  overflow-y: scroll;
+
 }
 .backForwardWrap {
   position: fixed;
@@ -188,8 +158,8 @@ li{
   border-radius: 10px 0 0 10px;
   transition: all 0.2s ease-in;
   line-height: 55px;
-  padding-left: 10px;
   user-select: none;
+  z-index: 9;
 }
 .backForwardWrap:hover {
   right: 0px;
@@ -242,8 +212,8 @@ li{
 }
 .list .listImg {
   display: block;
-  width: 45px;
-  height: 45px;
+  width: auto;
+  height: auto;
   border-radius: 10px;
   margin-right: 5px;
 }

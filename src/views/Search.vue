@@ -18,7 +18,7 @@
       {{ error }}
       <div class="data-view">
         <ul @scroll="handleScroll($event)">
-          <li v-for="(item, index) in songList" :key="index">
+          <!-- <li v-for="(item, index) in songList" :key="index">
             <div class="container">
               <span class="order">{{ index + 1 }}</span>
               <img class="list-img" :src="item.picUrl + '?param=45y45'" alt="" />
@@ -41,39 +41,17 @@
                 :icon="['fas', 'play-circle']"
               />
             </div>
-
-            <!-- <div class="container">
-              <img :src="url" alt="" />
-              <span class="order">{{ index + 1 }}</span>
-              <span class="music-title">
-                {{ item.name }} - {{ item.artists[0].name }}</span
-              >
-              <font-awesome-icon
-                class="PB-list"
-                :icon="['fas', 'play-circle']"
-              />
-            </div> -->
-            <!-- @click="
-                  sendInfo(
-                    item.id,
-                    item.name,
-                    item.artists[0].name,
-                    item.artists[0].id,
-                    item.album.name,
-                    item.album.id,
-                    item.duration
-                  )
-                " -->
-          </li>
+          </li> -->
+          <songlist :songList="songList"></songlist>
         </ul>
       </div>
     </div>
   </div>
 </template>
 <script>
-// import { mapMutations } from 'vuex';
 import { mapState } from "vuex";
-import util from '@/util/util'
+import util from '@/util/util';
+import SongList from '@/components/SongList'
 export default {
   name: "Search",
   data() {
@@ -83,7 +61,7 @@ export default {
       songList: [],
       error: "什么都没有....",
       list: [],
-      offset: 0,
+      offset: 1,
     };
   },
   methods: {
@@ -106,6 +84,7 @@ export default {
         picUrl,
         totalTime
       });
+      // console.log(MusicInfo);
       this.$store.commit("getMusicInfo", MusicInfo);
 
       util.mediaMetaDataHandle(MusicInfo);
@@ -113,18 +92,6 @@ export default {
       });
       document.title = `${musicName} - ${artist}`;
       this.$store.commit("isPlay", true);
-
-      // this.songList.forEach((v) => {
-      //   list.push({
-      //     musicID: v.id,
-      //     musicName: v.name,
-      //     artis: v.artists[0].name,
-      //     album: v.album.name,
-      //     albumID: v.album.id,
-      //     duration: v.duration,
-      //   });
-      //   this.$store.commit("getMusicList", list);
-      // });
     },
     search() {
       if (this.searchKeyWord != "") {
@@ -182,9 +149,7 @@ export default {
       // console.log(e);
       if (e.srcElement.scrollTop + e.srcElement.offsetHeight >=e.srcElement.scrollHeight) {
         this.offset++;
-        if(this.offset<3){
-          
-        console.log(this.offset);
+        if(this.offset<4){
         this.axios.get(
             "https://api.wick32.cn/search?keywords=" +
               this.searchKeyWord +
@@ -211,6 +176,7 @@ export default {
                       duration: v.duration,
                       picUrl: url,
                     });
+                    
                   })
                   .catch((err) => {
                     // console.log(err);
@@ -225,34 +191,13 @@ export default {
     // ...mapMutations(['getMusicId']),
     ...mapState(["musicInfo"]),
   },
+  components:{
+    "songlist":SongList
+  }
 };
 </script>
 <style scoped>
-.container {
-  width: 100%;
-  height: 50px;
-  display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-sizing: border-box;
-  line-height: 50px;
-  user-select: none;
-  overflow: hidden;
-  padding-top: 2px;
-  position: relative;
-}
-.container:hover .PB-list {
-  bottom: 5px;
-}
-.PB-list {
-  position: absolute;
-  bottom: -20px;
-  left: 120px;
-  cursor: pointer;
-  transition: all 0.2s ease-in;
-}
-.music-title {
-  line-height: 20px;
-}
+
 .search {
   display: flex;
 }
@@ -268,7 +213,7 @@ export default {
 .data-view > ul {
   /* overflow: auto; */
   overflow-y: scroll;
-  height: 100%;
+  height: calc(100% - 90px);
 }
 
 .view {

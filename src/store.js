@@ -2,8 +2,9 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import util from '@/util/util'
 Vue.use(Vuex)
-
+let tempArr = [];
 export default new Vuex.Store({
+
     state: {
         musicInfo: {
             musicID: 0,
@@ -17,17 +18,19 @@ export default new Vuex.Store({
             duration: 0,
             totalTime: 0
         },
-        musicList: {
-
-        },
+        musicList: [],
         isPlay: false,
         recommAlbumList: [],
         audioElement: null,
         playViewShow: false,
     },
     mutations: {
+
         getMusicInfo(state, MusicInfo) {
-            // console.log(MusicInfo[0].totalTime);
+            tempArr.push(MusicInfo[0])
+            state.musicList = util.unique(tempArr);
+
+            // console.log(state.musicList);
             state.musicInfo.musicID = MusicInfo[0].musicID;
             state.musicInfo.musicName = MusicInfo[0].musicName;
             state.musicInfo.artist = MusicInfo[0].artist;
