@@ -6,9 +6,14 @@
     <navigattion />
     <div class="viws-wrap">
       <div class="viws">
+        <toast ref="toast"></toast>
         <player v-if="playViewShow"></player>
-        <transition @before-enter="isShowFN()">
-          <router-view />
+        <transition enter-active-class="**animated** bounceIn" leave-active-class="**animated** bounceOut">
+          <router-view v-if="!showPlayList" />
+          <div class="play-list-wrap" v-if="showPlayList">
+            <!-- <songlist :songList="musicList"></songlist> -->
+            <albumDetail :albumDetailData="albumDetail" :albumList="musicList" :backForwardShow="showPlayList" @showAlbum="showPlayListHandle"></albumDetail>
+          </div>
         </transition>
       </div>
       <div class="play-mini">
@@ -24,11 +29,13 @@
 
         <div class="bottom-panel">
           <div class="play-button-control">
-            <font-awesome-icon @click="prevMusicHandle" id="backward" class="PB-control-icon" :icon="['fas', 'backward']" />
+            <font-awesome-icon @click="prev_next_Handle(true)" id="backward" class="PB-control-icon"
+              :icon="['fas', 'backward']" />
             <font-awesome-icon v-if="!isPlay" @click="play" id="play" class="PB-control-icon" :icon="['fas', 'play']" />
             <font-awesome-icon v-if="isPlay" @click="pause" id="pause" class="PB-control-icon"
               :icon="['fas', 'pause']" />
-            <font-awesome-icon @click="nextMusicHandle" id="forward" class="PB-control-icon" :icon="['fas', 'forward']" />
+            <font-awesome-icon @click="prev_next_Handle(false)" id="forward" class="PB-control-icon"
+              :icon="['fas', 'forward']" />
           </div>
 
           <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
@@ -38,27 +45,30 @@
             <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
           </div>
 
-         
-            <div class="volume-wrap" @mouseleave="volumeShow=false">
-              <div class="volume" v-show="volumeShow">
-                {{parseInt(volumeValues)}}
-                <input type="range" max="100" :value="volumeValues" class="range" @mousedown="volumeHandle"
-                  ref="volume">
-              </div>
-              <font-awesome-icon @mouseenter="volumeShow=true" class="volume-icon" :icon="['fas','volume-up']" />
-            </div>
 
-            <div class="play-list-wrap">
-              <div class="music-list" v-show="listShow">
-                <p v-for="item in musicList" :key="item.musicID" :style="`color:${musicInfo.musicID==item.musicID?'red':''}`">
-                  {{item.musicName}}
-                </p>
-              </div>
-              {{musicList.length}}
-              <font-awesome-icon @click="listShow=!listShow" class="play-list" :icon="['fas','list-ul']" />
+          <div class="volume-wrap" @mouseleave="volumeShow=false">
+            <div class="volume" v-show="volumeShow">
+              {{parseInt(volumeValues)}}
+              <input type="range" max="100" :value="volumeValues" class="range" @mousedown="volumeHandle" ref="volume">
+            </div>
+            <font-awesome-icon @mouseenter="volumeShow=true" class="volume-icon" :icon="['fas','volume-up']" />
+          </div>
+
+          <div class="play-list-btn-wrap" @click="showPlayListHandle">
+            {{musicList.length}}
+            <font-awesome-icon class="play-list" :icon="['fas','list-ul']" />
+          </div>
+          <div class="play-mode-wrap">
+            <div class="play-mode-panel">
+            <font-awesome-icon @click="setPlayModeHandler(1)" class="play-mode-panel-icon" :icon="['fas','redo-alt']"></font-awesome-icon>
+            <font-awesome-icon @click="setPlayModeHandler(2)" class="play-mode-panel-icon" :icon="['fas','random']"></font-awesome-icon>
+            <font-awesome-icon @click="setPlayModeHandler(3)" class="play-mode-panel-icon" :icon="['fas','angle-double-right']"></font-awesome-icon>
+
+            </div>
+            <font-awesome-icon class="play-mode-icon" :icon="['fas',playModeIcon]"></font-awesome-icon>
           </div>
           <audio ref="audioElement" style="display:block;" autoplay :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
-          " loop @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
+          " @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
             @seeked="setBufferedHandle" />
 
         </div>
@@ -69,18 +79,22 @@
 </template>
 
 <script>
+  import animate from 'animate.css'
   import navigattion from "./components/nav.vue";
   import player from "./views/Player.vue";
   import {
     mapState
   } from "vuex";
-  import util from '@/util/util'
+  import util from '@/util/util';
+  import Toast from '@/components/Toast'
+  // import SongList from '@/components/SongList'
+  import AlbumDetail from '@/components/AlbumDetail'
   export default {
     name: "App",
     data() {
       return {
-        isShow: false,
-        hash: "",
+        albumDetail:[],
+        show: false,
         audioElement: "",
         currentTime: 0,
         totalTime: 0,
@@ -89,40 +103,97 @@
         fastForwardPoint: 0,
         volumeShow: false,
         volumeValues: 0,
-        playIndex:0,
-        listShow:false
+        playIndex: 0,
+        playMod:1,  //1 单曲循化 2 随机播放 3 顺序播放
+        playModeIcon:'angle-double-right'
       };
     },
     methods: {
-      // 播放列表 测试
-      prevMusicHandle() {
-        let playID = this.$store.state.musicInfo.musicID;
-        console.log(playID);
-        let prevMusic = []
-        let tempList = []
-        this.musicList.filter((item,index)=>{
-          // console.log(item);
-          if(item.musicID==playID){
-            let i = --index;
-            if(i<0) i = this.musicList.length-1;
-            prevMusic[0] = this.musicList[i] 
-            this.$store.commit('getMusicInfo',prevMusic)
-          }
-        });
+      // 单曲
+      setPlayModeHandler(flag){
+        if(flag==1){
+          this.playMod = 1;
+          this.playModeIcon = 'redo-alt';
+          this.$refs.toast.showToast('单曲循环', 3);
+        }else if(flag==2){
+          this.playMod=2;
+          this.playModeIcon = 'random';
+          this.$refs.toast.showToast('随机播放', 3);
+        }else{
+          this.playMod=3
+          this.playModeIcon = 'angle-double-right';
+          this.$refs.toast.showToast('顺序播放', 3);
+        }
 
-        // console.log(this.musicList);
       },
-      nextMusicHandle(){
+      // 播放模式
+      playModeHandle(){
+        if(this.playMod==1){
+          this.audioElement.pause();
+          this.audioElement.play();
+        }else if(this.playMod==2){
+          let randIndex = Math.floor(Math.random()*this.musicList.length);
+          let randMusic =[]
+          randMusic[0] = this.musicList[randIndex]
+          this.$store.commit('getMusicInfo', randMusic)
+
+        }else{
+          this.prev_next_Handle(false)
+        }
+      },
+      // 显示播放歌单
+      showPlayListHandle() {
+        this.albumDetail[0] = {
+          coverImgUrl:this.musicList[0].picUrl,
+          albumName:'播放列表'
+        }
+        this.$store.commit('setShowPlayList',this.show = !this.show)
+        this.$store.commit('setPlayViewShow', true);
+      },
+      //监控物理媒体按键
+      //这个方法调用了现代浏览器的新特性,对非chromium内核的浏览器基本上不支持!
+      //这个功能最大的用处是 当你按下键盘上的多媒体物理按键的时候,屏幕左上角会弹出一个显示当前播放音视频的面板
+      prev_next_mediaMetadata() {
+        let data = [];
+        data[0] = this.$store.state.musicInfo
+        util.mediaMetaDataHandle(data)
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.setActionHandler('play', () => this.play());
+          navigator.mediaSession.setActionHandler('pause', () => this.pause());
+          navigator.mediaSession.setActionHandler('previoustrack', () => this.prev_next_Handle(true));
+          navigator.mediaSession.setActionHandler('nexttrack', () => this.prev_next_Handle(false));
+        }
+      },
+      // 上下首播放
+      prev_next_Handle(flag) {
+        // flag=true 上一首 
+        // false下一首
         let playID = this.$store.state.musicInfo.musicID;
-        let nextMusic = [];
-        this.musicList.filter((item,index)=>{
-          if(item.musicID==playID){
-            let i = ++index;
-            if(i>this.musicList.length-1) i = 0;
-            nextMusic[0] = this.musicList[i];
-            this.$store.commit('getMusicInfo',nextMusic)
-          }
-        })
+        if (this.musicList.length == 1) {
+          // toast组件 参数1:提示信息,参数2:持续时间 单位秒
+          this.$refs.toast.showToast('目前播放列表只有一首', 3);
+        }
+        let tempList = []
+        if (flag) {
+          this.musicList.filter((item, index) => {
+            // console.log(item);
+            if (item.musicID == playID) {
+              let i = --index;
+              if (i < 0) i = this.musicList.length - 1;
+              tempList[0] = this.musicList[i]
+              this.$store.commit('getMusicInfo', tempList)
+            }
+          });
+        } else {
+          this.musicList.filter((item, index) => {
+            if (item.musicID == playID) {
+              let i = ++index;
+              if (i > this.musicList.length - 1) i = 0;
+              tempList[0] = this.musicList[i];
+              this.$store.commit('getMusicInfo', tempList)
+            }
+          })
+        }
       },
       // 是否显示播放界面
       playShowHandle() {
@@ -163,7 +234,7 @@
       fastForward(e) {
         let progressBarWrapOffsetWidth = e.target.offsetWidth;
         let jumpPoint = parseInt((e.offsetX / progressBarWrapOffsetWidth) * 100);
-        console.log(e.offsetX, progressBarWrapOffsetWidth);
+        // console.log(e.offsetX, progressBarWrapOffsetWidth);
         let mouseX = 0;
         this.audioElement.currentTime = Math.floor((jumpPoint / 100) * this.audioElement.duration);
 
@@ -200,7 +271,8 @@
       },
       recommMusic() {
         this.axios.get("/personalized/newsong?limit=10").then((re) => {
-          let data = re.data.result[0];
+          let random = parseInt(Math.random() * re.data.result.length);
+          let data = re.data.result[random];
           //计算总时间
           let duration = parseInt(data.song.duration / 1000);
           let totalTime = util.playTimeFormat(duration)
@@ -229,6 +301,7 @@
       },
       onPlayHandler() {
         this.$store.commit("isPlay", true);
+        this.prev_next_mediaMetadata()
         console.log("播放状态");
         // console.dir(this.audioElement);
       },
@@ -237,7 +310,9 @@
         console.log("暂停状态");
       },
       onEndedHandler() {
-        console.log("结束状态");
+        // 1 单曲播放 2 随机播放 3 顺序播放
+        console.log(this.playMod);
+        this.playModeHandle()
       },
       audioControls() {
         this.audioElement = this.$refs.audioElement;
@@ -267,21 +342,13 @@
           console.log(1);
         }
       },
-      isShowFN() {
-        const urlHash = {
-          "#/search": true,
-          "#/recom": true,
-        };
-        const {
-          hash
-        } = window.location;
-        this.isShow = Reflect.get(urlHash, hash);
-      },
-
     },
     components: {
       navigattion,
       player,
+      'toast': Toast,
+      // 'songlist': SongList,
+      'albumDetail':AlbumDetail,
     },
     mounted() {
       this.audioControls();
@@ -298,7 +365,8 @@
       ...mapState(["isPlay"]),
       ...mapState({
         playViewShow: state => state.playViewShow,
-        musicList: state => state.musicList
+        musicList: state => state.musicList,
+        showPlayList:state=>state.showPlayList,
       })
 
       // getMusicCurrentTime(time){
@@ -310,31 +378,70 @@
         // console.log(val);
         // this.playList()
         return val;
+      },
+      showPlayList(val){
+        return val;
       }
     }
   };
 </script>
 
 <style>
-.music-list{
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  border: 1px solid red;
-  padding: 10px;
-  background-color: #080808c0;
-}
-.play-list-wrap{
-  /* border: 1px solid red; */
-  font-size: 20px;
-  /* padding: 0 0 0 20px; */
-  margin-left: 20px;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.play-list-wrap:hover ,.volume-icon:hover{
-  color: white;
-}
+
+  .play-mode-wrap{
+    font-size: 20px;
+    position: relative;
+    margin-left: 20px;
+  }
+  .play-mode-wrap .play-mode-icon{
+    font-size: 22px;
+    cursor: pointer;
+  }
+  .play-mode-wrap .play-mode-icon:hover{
+    color: #fff;
+  }
+  .play-mode-wrap:hover .play-mode-panel{
+    opacity: 1;
+  }
+  .play-mode-wrap .play-mode-panel{
+    opacity: 0;
+    padding: 10px 10px 0 10px;
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -115px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.418);
+    transition: all 0.2s ease-in;
+  }
+  .play-mode-wrap .play-mode-panel .play-mode-panel-icon{
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  
+  .play-mode-wrap .play-mode-panel .play-mode-panel-icon:hover{
+    color: #fff;
+  }
+  .play-list-btn-wrap {
+    /* border: 1px solid red; */
+    font-size: 20px;
+    /* padding: 0 0 0 20px; */
+    margin-left: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .play-list-btn-wrap:hover,
+  .volume-icon:hover {
+    color: white;
+  }
+
   .volume-wrap .volume {
     position: absolute;
     height: 125px;
@@ -373,6 +480,15 @@
     bottom: -5px;
     transform: translateX(-50%);
     transition: color 0.2s;
+  }
+  .play-list-wrap {
+    width: 50%;
+    height: calc(100vh - 90px);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    overflow-x: hidden;
+    content-visibility: auto;
+    position: relative;
   }
 
 

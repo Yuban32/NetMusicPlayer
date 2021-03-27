@@ -49,7 +49,6 @@
                     picUrl,
                     totalTime
                 });
-                console.log(MusicInfo);
                 util.mediaMetaDataHandle(MusicInfo);
                 document.title = `${musicName} - ${artist} - Wick's播放器`;
                 this.$store.commit("isPlay", true);
@@ -81,22 +80,19 @@
 .line{
   position: absolute;
   top: 0;
-  left: -1490px;
-  width: 2000px;
-  height: 2200px;
+  left: -50px;
+  width: 20px;
+  height: 100%;
   background-color: rgba(255, 0, 0, 0.479);
-  transform: rotate(40deg);
+  transform: skewX(40deg);
 }
 @keyframes container-line {
   0%{
-   left: -1490px;
-    /* width: 5px; */
+   width: 20px;
   }50%{
-    left: -700px;
-    /* width: 150%; */
+    width: 80%;
   }100%{
-   left: -1490px;
-    /* width: 5px; */
+   width: 20px;
   }
 }
 .container:hover .PBList {
@@ -114,11 +110,6 @@
   line-height: 35px;
   padding-left: 10px;
   transition: all 0.2s;
-}
-.coverPic img {
-  height: 100px;
-  width: 100px;
-  border-radius: 10px;
 }
 .PBList {
   position: absolute;

@@ -58,7 +58,8 @@ router.beforeEach((to, from, next) => {
   if (prevRoute) {
     router.app.$options.store.commit('setPlayViewShow', true)
   } else {
-    router.app.$options.store.commit('setPlayViewShow', false)
+    router.app.$options.store.commit('setPlayViewShow', false);
+    router.app.$options.store.commit('setShowPlayList', false)
   }
   // router.app.$options.store.dispatch('setPlayShow', true).then((i) => {
   //   console.log(i);

@@ -135,7 +135,6 @@
         overflow: hidden;
         display: flex;
         position: relative;
-
     }
 
     .card-wrap {

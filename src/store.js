@@ -23,14 +23,13 @@ export default new Vuex.Store({
         recommAlbumList: [],
         audioElement: null,
         playViewShow: false,
+        showPlayList: false,
     },
     mutations: {
 
         getMusicInfo(state, MusicInfo) {
             tempArr.push(MusicInfo[0])
             state.musicList = util.unique(tempArr);
-
-            // console.log(state.musicList);
             state.musicInfo.musicID = MusicInfo[0].musicID;
             state.musicInfo.musicName = MusicInfo[0].musicName;
             state.musicInfo.artist = MusicInfo[0].artist;
@@ -41,6 +40,11 @@ export default new Vuex.Store({
             state.musicInfo.picUrl = MusicInfo[0].picUrl;
             state.musicInfo.duration = MusicInfo[0].duration;
             state.musicInfo.totalTime = MusicInfo[0].totalTime;
+        },
+        addMusicList(state, list) {
+            // let e = util.unique(list)
+            // state.musicList.push(...e)
+            // console.log(state.musicList);
         },
         getPicURL(state, step) {
             state.musicInfo.picUrl = step;
@@ -61,6 +65,9 @@ export default new Vuex.Store({
         setPlayViewShow(state, stpe) {
             state.playViewShow = stpe;
             // console.log(stpe);
+        },
+        setShowPlayList(state, step) {
+            state.showPlayList = step;
         }
     },
 })

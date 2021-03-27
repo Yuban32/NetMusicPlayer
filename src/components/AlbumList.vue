@@ -87,7 +87,7 @@
     display: flex;
     flex-direction: column;
     text-align: left;
-    overflow: auto
+    overflow: hidden auto;
   }
 
   ul,
@@ -95,20 +95,19 @@
     list-style: none;
     overflow-y: scroll;
   }
+  /* 子组件宽度兼容问题 暂未找到原因 只能强制设定50%宽度 */
   .albumDetail /deep/{
     height: calc(100% - 90px);
+    width: 50% !important;
   }
   .albumDetail /deep/ .backForwardWrap {
-        right: -120px;
-        padding-left: 10px;
-    }
-
-    .albumDetail /deep/ .backForwardWrap:hover {
-        right: 0px;
-    }
-    .albumDetail /deep/ .container:hover {
-      transform: translateX(120px) scale(1.2)
-    }
+    padding-left:10px;
+    right: -118px;
+    bottom: 100px;
+  }
+  .albumDetail /deep/ .backForwardWrap:hover{
+    right: 0px;
+  }
   .recommTitle {
     margin: 0 auto;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);

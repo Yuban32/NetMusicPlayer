@@ -51,5 +51,7 @@ export default {
 <style scoped>
 .recommend {
   background-color: rgba(63, 63, 63, 0.671);
+  width: 50%;
+  
 }
 </style>

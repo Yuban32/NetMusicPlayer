@@ -3,6 +3,7 @@
     <ul>
       <li v-for="(item, index) in listData" :key="index">
         <div class="container" @click="sendID(item.id)">
+          <div class="line"></div>
           <span class="order">{{ index + 1 }}</span>
           <img class="listImg" :src="item.picUrl" alt="" />
           <span
@@ -46,24 +47,52 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  width: 100%;
-  height: 50px;
-  display: flex;
+    li{
+  overflow: hidden;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   box-sizing: border-box;
+}
+.container {
+  width: 100%;
+  height: 70px;
+  display: flex;
+   /* css性能优化 跳过屏幕外的内容渲染 */
+  content-visibility: auto;
   line-height: 50px;
-  padding: 2px 0 0 10px;
-  cursor: pointer;
   user-select: none;
   overflow: hidden;
+  padding-top: 2px;
+  position: relative;
+  transition: all 0.2s;
+  
 }
+.line{
+  position: absolute;
+  top: 0;
+  left: -50px;
+  width: 20px;
+  height: 100%;
+  background-color: rgba(255, 0, 0, 0.479);
+  transform: skewX(40deg);
+}
+@keyframes container-line {
+  0%{
+   width: 20px;
+  }50%{
+    width: 80%;
+  }100%{
+   width: 20px;
+  }
+}
+.container:hover .PBList {
+  bottom: 15px;
+}
+.container:hover{
+  transform: translateX(50px) scale(1.2);
+  
 
-.listImg {
-  display: block;
-  width: 45px;
-  height: 45px;
-  border-radius: 10px;
-  margin-right: 5px;
+}
+.container:hover .line{
+  animation: container-line 1.5s ease-in-out infinite;
 }
 </style>

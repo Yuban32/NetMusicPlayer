@@ -1,5 +1,6 @@
 class Util {
     mediaMetaDataHandle(musicInfo) {
+        // console.log(musicInfo);
         musicInfo = musicInfo[0];
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({ // eslint-disable-line no-undef
@@ -14,6 +15,7 @@ class Util {
 
                 ]
             });
+            // navigator.mediaSession.setActionHandler('previoustrack',()=>{})
         }
     }
     zeroFill(num) {
