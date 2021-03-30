@@ -24,9 +24,25 @@ export default new Vuex.Store({
         audioElement: null,
         playViewShow: false,
         showPlayList: false,
+        loginCookie: null,
+        loginStatus: false,
+        userInfo: [],
+        userID: null,
+        LOADING: true,
     },
     mutations: {
+        getUserInfo(state, info) {
+            state.userInfo = info
+        },
+        setLoginCookie(state, cookie) {
+            state.loginCookie = cookie;
+            document.cookie = cookie
+        },
+        setLoginStatus(state, status) {
+            state.loginStatus = status;
+            sessionStorage.setItem('loginStatus', status)
 
+        },
         getMusicInfo(state, MusicInfo) {
             tempArr.push(MusicInfo[0])
             state.musicList = util.unique(tempArr);
@@ -68,6 +84,38 @@ export default new Vuex.Store({
         },
         setShowPlayList(state, step) {
             state.showPlayList = step;
+        },
+        setUserID(state, userID) {
+            state.userID = userID;
+            sessionStorage.setItem('userID', userID);
+        },
+        SET_LOADING(state, loading) {
+            state.LOADING = loading
+        },
+        CLEAN_LOADING(state) {
+            state.LOADING = false
         }
     },
+    getters: {
+        getLoginCookie: state => {
+            let cookies = state.loginCookie ? state.loginCookie : document.cookie;
+            return cookies;
+        },
+        getLoginStatus: state => {
+            let status = state.loginStatus ? state.loginStatus : sessionStorage.getItem('loginStatus');
+            return status;
+        },
+    },
+    actions: {
+        SetLoding({
+            commit
+        }, boolean) {
+            commit('SET_LOADING', boolean)
+        },
+        CLEANLOADING({
+            commit
+        }) {
+            commit('CLEAN_LOADING')
+        }
+    }
 })

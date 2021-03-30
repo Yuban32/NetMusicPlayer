@@ -1,11 +1,11 @@
 <template>
-    <div class="rank-list-title">
+    <div class="rank-list-title" :style="{fontSize:fontSize+'px',textAlign:textAlign}">
         {{title}}
     </div>
 </template>
 <script>
 export default {
-    props:['title']
+    props:['title','fontSize','textAlign']
 }
 </script>
 <style scoped>

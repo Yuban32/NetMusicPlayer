@@ -1,5 +1,6 @@
 <template>
     <div class="rank-list">
+        <loading v-if="loadingStatus"></loading>
         <div class="rank-wrap" v-if="!playViewShow">
             <div class="netease-rank">
                 <rank-list-title :title="'网易云音乐榜'"></rank-list-title>
@@ -21,7 +22,7 @@
         <div class="showDetail">
             {{albumShow?'':noData}}
             <albumDetail v-if="albumShow" :albumDetailData="albumDetailData" :albumList="albumList"
-                :backForwardShow="playViewShow" @showAlbum="playShowHandle"></albumDetail>
+                :backForwardShow="playViewShow" @showAlbum="playShowHandler"></albumDetail>
         </div>
     </div>
 </template>
@@ -29,6 +30,7 @@
     import cardImg from '@/components/Card-img'
     import RankListTitle from '../components/Rank-list-title.vue';
     import AlbumDetail from '@/components/AlbumDetail'
+    import Loading from '@/components/Loading'
     import {
         mapState
     } from 'vuex';
@@ -45,16 +47,16 @@
             }
         },
         methods: {
-            playShowHandle() {
+            playShowHandler() {
                 this.$store.commit('setPlayViewShow', false);
             },
             showRankListDetail(item) {
-                let id = null;
-                if (!item) {
-                    id = 19723756;
-                } else {
-                    id = item.id
-                }
+                let id = item?item.id:19723756;
+                // if (!item) {
+                //     id = 19723756;
+                // } else {
+                //     id = item.id
+                // }
                 // console.log(item);
                 this.axios.get("/playlist/detail/dynamic?id=" + id).then(re => {
                     let data = re.data.playlist
@@ -87,7 +89,7 @@
             playCountFormat(num) {
                 let playCount = Number(num);
                 if (playCount == 0) {
-                    return playCount + ``;
+                    return playCount + '';
                 } else if (playCount > 11 && playCount < 10000) {
                     return playCount + '';
                 } else {
@@ -98,7 +100,8 @@
         components: {
             'card-img': cardImg,
             'albumDetail': AlbumDetail,
-            'rankListTitle': RankListTitle
+            'rankListTitle': RankListTitle,
+            'loading':Loading,
         },
         mounted() {
             // 初始化榜单数据
@@ -119,12 +122,17 @@
         computed: {
             // 动态获取vuex里的指定数据
             ...mapState({
-                playViewShow: state => state.playViewShow
+                playViewShow: state => state.playViewShow,
+                loadingStatus:state=>state.LOADING
             }),
         },
         watch: {
             playViewShow(val, old) {
                 this.backForwardShow = val;
+                return val
+            },
+            loadingStatus(val){
+                console.log(val);
                 return val
             }
         }

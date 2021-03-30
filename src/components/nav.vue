@@ -1,12 +1,12 @@
 <template>
   <div id="navWrap">
     <transition-group name="nav" tag="ul" id="nav">
-      <!-- <router-link tag="li" to="/login" key="login" @click="fn()">
+      <router-link tag="li" to="/user" key="user">
         <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['far', 'user']" />
         </div>
-        登录
-      </router-link> -->
+        个人
+      </router-link>
       <router-link key="recoms" tag="li" to="/recom">
         <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'stream']" />

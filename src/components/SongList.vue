@@ -20,6 +20,7 @@
               " class="PBList" :icon="['fas', 'play-circle']" />
             </div>
         </li>
+        <div class="more" v-if="showMore" @click="showMoreHandler">加载更多</div>
     </ul>
 </template>
 
@@ -29,11 +30,16 @@
         name: 'songlist',
         data() {
             return {
-
+              index:1
             }
         },
-        props:['songList'],
+        props:['songList','showMore'],
         methods: {
+            showMoreHandler(){
+              this.index++
+              // console.log(this.index);
+              this.$emit("showMoreHandler",this.index);
+            },
             play(musicID, musicName, artist, artistID, album, albumID, picUrl, duration) {
                 let MusicInfo = [];
                 duration = parseInt(duration / 1000);
@@ -58,6 +64,11 @@
     }
 </script>
 <style scoped>
+  .more{
+    cursor: pointer;
+    height: 20px;
+    user-select: none;
+  }
     li{
   overflow: hidden;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);

@@ -58,14 +58,14 @@
             {{musicList.length}}
             <font-awesome-icon class="play-list" :icon="['fas','list-ul']" />
           </div>
-          <div class="play-mode-wrap">
-            <div class="play-mode-panel">
+          <div class="play-mode-wrap" @mouseenter="playModeShow=true">
+            <font-awesome-icon class="play-mode-icon" :icon="['fas',playModeIcon]"></font-awesome-icon>
+            <div class="play-mode-panel" v-if="playModeShow" @mouseleave="playModeShow=false">
             <font-awesome-icon @click="setPlayModeHandler(1)" class="play-mode-panel-icon" :icon="['fas','redo-alt']"></font-awesome-icon>
             <font-awesome-icon @click="setPlayModeHandler(2)" class="play-mode-panel-icon" :icon="['fas','random']"></font-awesome-icon>
             <font-awesome-icon @click="setPlayModeHandler(3)" class="play-mode-panel-icon" :icon="['fas','angle-double-right']"></font-awesome-icon>
 
             </div>
-            <font-awesome-icon class="play-mode-icon" :icon="['fas',playModeIcon]"></font-awesome-icon>
           </div>
           <audio ref="audioElement" style="display:block;" autoplay :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
           " @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
@@ -104,23 +104,24 @@
         volumeShow: false,
         volumeValues: 0,
         playIndex: 0,
-        playMod:1,  //1 单曲循化 2 随机播放 3 顺序播放
-        playModeIcon:'angle-double-right'
+        playMode:1,  //1 单曲循化 2 随机播放 3 顺序播放
+        playModeIcon:'angle-double-right',
+        playModeShow:false,
       };
     },
     methods: {
       // 单曲
       setPlayModeHandler(flag){
         if(flag==1){
-          this.playMod = 1;
+          this.playMode = 1;
           this.playModeIcon = 'redo-alt';
           this.$refs.toast.showToast('单曲循环', 3);
         }else if(flag==2){
-          this.playMod=2;
+          this.playMode=2;
           this.playModeIcon = 'random';
           this.$refs.toast.showToast('随机播放', 3);
         }else{
-          this.playMod=3
+          this.playMode=3
           this.playModeIcon = 'angle-double-right';
           this.$refs.toast.showToast('顺序播放', 3);
         }
@@ -128,18 +129,20 @@
       },
       // 播放模式
       playModeHandle(){
-        if(this.playMod==1){
+        if(this.playMode==1){
           this.audioElement.pause();
           this.audioElement.play();
-        }else if(this.playMod==2){
+        }else if(this.playMode){
+          this.randomPlayMode();
+        }else if(this.playMode==3){
+          this.prev_next_Handle(false)
+        }
+      },
+      randomPlayMode(){
           let randIndex = Math.floor(Math.random()*this.musicList.length);
           let randMusic =[]
           randMusic[0] = this.musicList[randIndex]
           this.$store.commit('getMusicInfo', randMusic)
-
-        }else{
-          this.prev_next_Handle(false)
-        }
       },
       // 显示播放歌单
       showPlayListHandle() {
@@ -191,6 +194,8 @@
               if (i > this.musicList.length - 1) i = 0;
               tempList[0] = this.musicList[i];
               this.$store.commit('getMusicInfo', tempList)
+            }else if(this.playMode==2){
+              this.randomPlayMode();
             }
           })
         }
@@ -400,11 +405,8 @@
   .play-mode-wrap .play-mode-icon:hover{
     color: #fff;
   }
-  .play-mode-wrap:hover .play-mode-panel{
-    opacity: 1;
-  }
+
   .play-mode-wrap .play-mode-panel{
-    opacity: 0;
     padding: 10px 10px 0 10px;
     border: 1px solid red;
     display: flex;
@@ -417,8 +419,9 @@
     transform: translateX(-50%);
     border: 1px solid rgb(255, 255, 255);
     border-radius: 15px;
-    background-color: rgba(255, 255, 255, 0.418);
+    background-color: rgba(255, 255, 255, 0.562);
     transition: all 0.2s ease-in;
+    z-index: 9;
   }
   .play-mode-wrap .play-mode-panel .play-mode-panel-icon{
     margin-bottom: 10px;

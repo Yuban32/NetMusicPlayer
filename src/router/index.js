@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import store from '../store';
 Vue.use(VueRouter)
 
 const routes = [{
@@ -29,9 +30,17 @@ const routes = [{
     name: 'Setting',
     component: () => import('../views/Setting.vue')
   }, {
-    path: '/login',
-    name: 'Login',
-    component: () => import('../views/Login.vue')
+    path: '/user',
+    name: 'User',
+    component: () => import('../views/User.vue'),
+    beforeEnter: (to, from, next) => {
+      let cookies = router.app.$options.store.getters.getLoginCookie ? router.app.$options.store.getters.getLoginCookie : document.cookie;
+      if (!cookies) {
+        next('/login');
+      } else {
+        next();
+      }
+    }
   }, {
     path: '/search',
     name: 'Search',
@@ -44,6 +53,11 @@ const routes = [{
     path: '/rank',
     name: 'RankList',
     component: () => import('../views/RankList.vue')
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/Login.vue')
   }
 ]
 
@@ -64,7 +78,7 @@ router.beforeEach((to, from, next) => {
   // router.app.$options.store.dispatch('setPlayShow', true).then((i) => {
   //   console.log(i);
   // })
-
+  store.dispatch('CLEANLOADING');
   next();
   // console.log(prevRoute);
 })

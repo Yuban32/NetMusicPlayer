@@ -1,5 +1,6 @@
 <template>
   <div class="search">
+    <loading v-if="loadingStatus"></loading>
     <router-view></router-view>
     <div class="view">
       <div class="search-input">
@@ -18,30 +19,6 @@
       {{ error }}
       <div class="data-view">
         <ul @scroll="handleScroll($event)">
-          <!-- <li v-for="(item, index) in songList" :key="index">
-            <div class="container">
-              <span class="order">{{ index + 1 }}</span>
-              <img class="list-img" :src="item.picUrl + '?param=45y45'" alt="" />
-              <span class="music-title"
-                >{{ item.musicName }}<span> - {{ item.album }}</span></span
-              >
-              <font-awesome-icon
-                @click="
-                  sendInfo(
-                    item.musicID,
-                    item.musicName,
-                    item.artist,
-                    item.artistID,
-                    item.album,
-                    item.albumID,
-                    item.duration
-                  )
-                "
-                class="PB-list"
-                :icon="['fas', 'play-circle']"
-              />
-            </div>
-          </li> -->
           <songlist :songList="songList"></songlist>
         </ul>
       </div>
@@ -52,6 +29,7 @@
 import { mapState } from "vuex";
 import util from '@/util/util';
 import SongList from '@/components/SongList'
+import Loading from '@/components/Loading'
 export default {
   name: "Search",
   data() {
@@ -190,9 +168,18 @@ export default {
   computed: {
     // ...mapMutations(['getMusicId']),
     ...mapState(["musicInfo"]),
+    ...mapState({
+        loadingStatus:state=>state.LOADING
+      }),
+  },
+  watch:{
+    loadingStatus(val){
+      return val;
+    }
   },
   components:{
-    "songlist":SongList
+    "songlist":SongList,
+    'loading':Loading,
   }
 };
 </script>

@@ -23,7 +23,7 @@
       </div>
     </div>
     <!-- 渲染出来的歌单详细数据 -->
-    <songList :songList="albumList"></songList>
+    <songList :songList="albumList" :showMore="showMore" @showMoreHandler="showMoreHandler"></songList>
 
     <div class="backForwardWrap" @click="sendBack" v-if="backForwardShow">
       <font-awesome-icon class="backForward" :icon="['fas', 'chevron-left']">BACK</font-awesome-icon>
@@ -42,8 +42,11 @@
         songList: this.albumList
       }
     },
-    props: ['albumDetailData', 'albumList', 'backForwardShow'],
+    props: ['albumDetailData', 'albumList', 'backForwardShow','showMore'],
     methods: {
+      showMoreHandler(e){
+        this.$emit('showMoreHandler',e)
+      },
       sendBack() {
         this.$emit('showAlbum', this.showAlbums);
         // console.log(123);
