@@ -4,8 +4,8 @@
     <div class="loginWrap">
       <form class="form">
         <p><input type="text" placeholder="手机号" v-model="phone" /></p>
-        <p><input type="password" placeholder="请输入密码" v-model="password" @keyup.enter="login"/></p>
-        <button @click="login">登录</button>
+        <p><input type="password" placeholder="请输入密码" v-model="password" @keyup.enter.prevent="login"/></p>
+        <button @click.prevent="login">登录</button>
       </form>
     </div>
   </div>

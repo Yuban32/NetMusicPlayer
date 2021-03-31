@@ -105,7 +105,7 @@
         volumeValues: 0,
         playIndex: 0,
         playMode:1,  //1 单曲循化 2 随机播放 3 顺序播放
-        playModeIcon:'angle-double-right',
+        playModeIcon:'redo-alt',
         playModeShow:false,
       };
     },
@@ -120,7 +120,7 @@
           this.playMode=2;
           this.playModeIcon = 'random';
           this.$refs.toast.showToast('随机播放', 3);
-        }else{
+        }else if(flag==3){
           this.playMode=3
           this.playModeIcon = 'angle-double-right';
           this.$refs.toast.showToast('顺序播放', 3);

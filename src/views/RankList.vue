@@ -58,7 +58,7 @@
                 //     id = item.id
                 // }
                 // console.log(item);
-                this.axios.get("/playlist/detail/dynamic?id=" + id).then(re => {
+                this.axios.get("/playlist/detail?id=" + id).then(re => {
                     let data = re.data.playlist
                     this.albumDetailData = [];
                     this.albumDetailData.push({

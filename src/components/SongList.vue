@@ -37,7 +37,6 @@
         methods: {
             showMoreHandler(){
               this.index++
-              // console.log(this.index);
               this.$emit("showMoreHandler",this.index);
             },
             play(musicID, musicName, artist, artistID, album, albumID, picUrl, duration) {
@@ -55,6 +54,7 @@
                     picUrl,
                     totalTime
                 });
+
                 util.mediaMetaDataHandle(MusicInfo);
                 document.title = `${musicName} - ${artist} - Wick's播放器`;
                 this.$store.commit("isPlay", true);
@@ -64,6 +64,9 @@
     }
 </script>
 <style scoped>
+  .listImg{
+    border-radius: 5px;
+  }
   .more{
     cursor: pointer;
     height: 20px;
@@ -110,7 +113,7 @@
   bottom: 15px;
 }
 .container:hover{
-  transform: translateX(50px) scale(1.2);
+  transform: translateX(10%) scale(1.2);
   
 
 }

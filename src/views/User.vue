@@ -108,7 +108,8 @@ export default {
             let id = item?item.id:313718455;
             // console.log(id);
             this.musicID = [];
-            this.axios.get(`/playlist/detail/dynamic?id=${id}`).then(re=>{
+            this.albumList = [];
+            this.axios.get(`/playlist/detail?id=${id}`).then(re=>{
                 let data = re.data.playlist;
                 this.albumDescription = [];
                 this.albumDescription.push({
@@ -126,7 +127,6 @@ export default {
             
         },
         searchAlbumList(data){
-            this.albumList = [];
                 this.musicIDs = []
                 this.musicID.forEach((item,index)=>{
                     if(index<100*this.offset){
@@ -277,12 +277,16 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+        
+    }
+    .user-wrap .show-album-detail{
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
     }
     .user-wrap .user-info-wrap, .user-wrap .show-album-detail{
         flex: 1;
         width: 50%;
         height: 100%;
-        border-left: 1px solid rgba(255, 255, 255, 0.2);
+        
         overflow: hidden;
     }
     .user-wrap .user-info-wrap{
