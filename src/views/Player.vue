@@ -134,6 +134,7 @@
   .player {
     display: flex;
     /* justify-content: center; */
+    width: 100%;
     align-items: center;
     flex-direction: column;
     height: 100%;
