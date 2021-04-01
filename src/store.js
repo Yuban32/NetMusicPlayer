@@ -46,6 +46,7 @@ export default new Vuex.Store({
 
         },
         getMusicInfo(state, MusicInfo) {
+            console.log(MusicInfo);
             tempArr.push(MusicInfo[0])
             state.musicList = util.unique(tempArr);
             state.musicInfo.musicID = MusicInfo[0].musicID;
@@ -58,6 +59,7 @@ export default new Vuex.Store({
             state.musicInfo.picUrl = MusicInfo[0].picUrl;
             state.musicInfo.duration = MusicInfo[0].duration;
             state.musicInfo.totalTime = MusicInfo[0].totalTime;
+            document.title = MusicInfo[0].musicName +' - ' +MusicInfo[0].album;
         },
         addMusicList(state, list) {
             // let e = util.unique(list)

@@ -402,7 +402,7 @@
 
     },
     created() {
-      // this.recommMusic();
+      this.recommMusic();
     },
     computed: {
       ...mapState(["musicInfo"]),
