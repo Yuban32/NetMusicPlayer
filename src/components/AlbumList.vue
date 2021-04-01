@@ -2,7 +2,7 @@
   <div class="list">
     <!-- 推荐歌单 -->
     <h1 class="recommTitle" v-show="!showAlbum">{{ recommTitle }}</h1>
-    <list v-if="!showAlbum" :listData="recommAlbumList" @getMusicID="showRecommAblum"></list>
+    <list class="list-component" v-if="!showAlbum" :listData="recommAlbumList" @getMusicID="showRecommAblum" ></list>
 
     <!-- 详情 -->
     
@@ -34,11 +34,11 @@
         this.showAlbum = showAlbums;
       },
       showRecommAblum(id) {
-        // console.log(id);
+        console.log(id);
         let dataList = null
         this.recommTitle = "每日推荐歌单详情";
         this.axios
-          .get("/playlist/detail/dynamic?id=" + id)
+          .get("/playlist/detail?id=" + id)
           .then((result) => {
             let data = result.data.playlist
             this.albumDetail = [];
@@ -65,7 +65,9 @@
             })
             this.showAlbum = true;
           })
-          .catch((err) => {});
+          .catch((err) => {
+            console.log(err);
+          });
       },
 
     },
@@ -96,6 +98,9 @@
     overflow-y: scroll;
   }
   /* 子组件宽度兼容问题 暂未找到原因 只能强制设定50%宽度 */
+  .list-component /deep/ .container{
+    cursor: pointer;
+  }
   .albumDetail /deep/{
     height: calc(100% - 90px);
     width: 50% !important;

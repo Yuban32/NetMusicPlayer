@@ -26,7 +26,9 @@ export default {
         let re = new RegExp(reg)
         let md5_password = this.$md5(this.password);
         if(re.test(this.phone)){
-          this.axios.post(`/login/cellphone?phone=${this.phone}&md5_password=${md5_password}`).then(result=>{
+          this.axios.post(`/login/cellphone?phone=${this.phone}&md5_password=${md5_password}`,{
+            withCredentials: true
+          }).then(result=>{
             // console.log(result);
             let code = result.data.code;
             let msg = result.data.msg;

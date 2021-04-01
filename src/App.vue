@@ -7,7 +7,9 @@
     <div class="viws-wrap">
       <div class="viws">
         <toast ref="toast"></toast>
-        <player v-if="playViewShow"></player>
+        <keep-alive>
+        <player v-show="playViewShow" ref="players"></player>
+        </keep-alive>
         <transition enter-active-class="**animated** bounceIn" leave-active-class="**animated** bounceOut">
           <router-view v-if="!showPlayList" />
           <div class="play-list-wrap" v-if="showPlayList">
@@ -67,10 +69,13 @@
 
             </div>
           </div>
-          <audio ref="audioElement" style="display:block;" autoplay :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicUrl}.mp3`
+          <!-- :crossorigin="anonymous?'anonymous':'use-credentials'"  -->
+          <!-- <audio ref="audioElement" style="display:block;" :src="MusicUrl
           " @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
-            @seeked="setBufferedHandle" />
-
+            @seeked="setBufferedHandle" /> -->
+          <audio ref="audioElement" autoplay style="display:block;" :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicID}.mp3`
+                    " @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
+                      @seeked="setBufferedHandle" />
         </div>
 
       </div>
@@ -83,6 +88,7 @@
   import navigattion from "./components/nav.vue";
   import player from "./views/Player.vue";
   import {
+    mapGetters,
     mapState
   } from "vuex";
   import util from '@/util/util';
@@ -107,23 +113,57 @@
         playMode:1,  //1 单曲循化 2 随机播放 3 顺序播放
         playModeIcon:'redo-alt',
         playModeShow:false,
+        MusicUrl:null,
+        setTimeous:null,
+        loginCookie:null,
+        MusicVisual:null,
       };
     },
     methods: {
+      // 获取真实的音乐URL地址 由于可视化失败 此方法暂时废弃
+      getMusicUrl(){
+        this.loginCookie = this.$store.getters.getLoginCookie
+        this.axios.get(`/song/url?id=${this.musicInfo.musicID}`).then(res=>{
+          // console.log(res);
+          
+          // this.MusicUrl = res.data.data[0].url?res.data.data[0].url+'?infoId=92001':`https://music.163.com/song/media/outer/url?id=${this.musicInfo.musicID}.mp3`
+          if(res.data.data[0].url){
+            this.MusicUrl = res.data.data[0].url+'?infoId=92001';
+            this.MusicVisual=true;
+            this.audioElement.setAttribute('crossorigin','anonymous');
+            this.$store.commit('setMusicVisualization','执行');
+            // this.audioElement.
+          }else{
+            this.MusicVisual = false;
+            this.audioElement.removeAttribute('crossorigin');
+            this.MusicUrl = `https://music.163.com/song/media/outer/url?id=${this.musicInfo.musicID}.mp3`
+            this.$store.commit('setMusicVisualization','不执行');
+          }
+          // 在链接后面加入?infoId=92001 可以跨域 这个应该是网易后端开放出来给他们在知乎的团队用的 不是真正的跨域解决方案!
+          
+        }).catch(error=>{
+          console.log(error);
+        })
+      },
       // 单曲
       setPlayModeHandler(flag){
         if(flag==1){
-          this.playMode = 1;
+          // this.playMode = 1;
+          this.$store.commit('setPlayMode',1);
           this.playModeIcon = 'redo-alt';
           this.$refs.toast.showToast('单曲循环', 3);
         }else if(flag==2){
-          this.playMode=2;
+          // this.playMode=2;
           this.playModeIcon = 'random';
           this.$refs.toast.showToast('随机播放', 3);
+          this.$store.commit('setPlayMode',2);
+
         }else if(flag==3){
-          this.playMode=3
+          // this.playMode=3
           this.playModeIcon = 'angle-double-right';
           this.$refs.toast.showToast('顺序播放', 3);
+          this.$store.commit('setPlayMode',3);
+
         }
 
       },
@@ -307,16 +347,16 @@
       onPlayHandler() {
         this.$store.commit("isPlay", true);
         this.prev_next_mediaMetadata()
-        console.log("播放状态");
+        // console.log("播放状态");
         // console.dir(this.audioElement);
       },
       onPauseHandler() {
         this.$store.commit("isPlay", false);
-        console.log("暂停状态");
+        // console.log("暂停状态");
       },
       onEndedHandler() {
         // 1 单曲播放 2 随机播放 3 顺序播放
-        console.log(this.playMod);
+        // console.log(this.playMod);
         this.playModeHandle()
       },
       audioControls() {
@@ -331,7 +371,7 @@
             .play()
             .then(() => {
               this.$store.commit("isPlay", true);
-              console.log(2);
+              // console.log(2);
             })
             .catch((err) => {
               console.log(err);
@@ -344,7 +384,7 @@
         if (isplay) {
           this.audioElement.pause();
           this.$store.commit("isPlay", false);
-          console.log(1);
+          // console.log(1);
         }
       },
     },
@@ -362,7 +402,7 @@
 
     },
     created() {
-      this.recommMusic();
+      // this.recommMusic();
     },
     computed: {
       ...mapState(["musicInfo"]),
@@ -372,13 +412,23 @@
         playViewShow: state => state.playViewShow,
         musicList: state => state.musicList,
         showPlayList:state=>state.showPlayList,
-      })
+        MusicID:state=>state.musicInfo.musicID,
+      }),
+      ...mapGetters(['getPlayMode'])
 
       // getMusicCurrentTime(time){
 
       // },
     },
     watch: {
+      getPlayMode(val){
+        this.playMode = val
+        // console.log(val);
+      },
+      MusicID(val){
+        // this.getMusicUrl()
+        return val;
+      },
       musicList(val, old) {
         // console.log(val);
         // this.playList()
@@ -386,6 +436,12 @@
       },
       showPlayList(val){
         return val;
+      },MusicUrl(val){
+        clearTimeout(this.setTimeous)
+        setTimeout(()=>{
+          this.audioElement.play()
+        },1000)
+        return val
       }
     }
   };
@@ -667,7 +723,7 @@
   }
 
   #app .viws>div {
-    flex: 1;
+    /* flex: 1; */
   }
 
   .viws-wrap {

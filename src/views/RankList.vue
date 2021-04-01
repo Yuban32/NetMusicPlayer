@@ -52,12 +52,6 @@
             },
             showRankListDetail(item) {
                 let id = item?item.id:19723756;
-                // if (!item) {
-                //     id = 19723756;
-                // } else {
-                //     id = item.id
-                // }
-                // console.log(item);
                 this.axios.get("/playlist/detail?id=" + id).then(re => {
                     let data = re.data.playlist
                     this.albumDetailData = [];
@@ -67,10 +61,8 @@
                         description: data.description,
                         creatorName: data.creator.nickname
                     });
-                    // console.log(data.tracks);
                     this.albumList = [];
                     data.tracks.forEach(item => {
-                        // console.log(item.id,item.name,item.ar[0].name,item.ar[0].id,item.al.name,item.al.id,item.dt,item.al.picUrl,);
                         this.albumList.push({
                             musicID: item.id,
                             musicName: item.name,
@@ -132,7 +124,7 @@
                 return val
             },
             loadingStatus(val){
-                console.log(val);
+                // console.log(val);
                 return val
             }
         }
@@ -143,6 +135,7 @@
         overflow: hidden;
         display: flex;
         position: relative;
+        width: 100%;
     }
 
     .card-wrap {

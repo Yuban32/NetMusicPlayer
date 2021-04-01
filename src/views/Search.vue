@@ -187,6 +187,7 @@ export default {
 
 .search {
   display: flex;
+  width: 100%;
 }
 
 .search > div {

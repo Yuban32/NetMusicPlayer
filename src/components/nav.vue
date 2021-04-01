@@ -24,12 +24,12 @@
           <font-awesome-icon class="navIcon" :icon="['fas', 'list-ul']" />
         </div>
         榜单</router-link>
-      <router-link key="settings" tag="li" to="/setting">
+      <!-- <router-link key="settings" tag="li" to="/setting">
         <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'cog']" />
         </div>
         设置
-      </router-link>
+      </router-link> -->
       <router-link key="abouts" tag="li" to="/about">
         <div class="icon-wrap">
           <font-awesome-icon class="navIcon" :icon="['fas', 'info-circle']" />

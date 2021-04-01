@@ -1,7 +1,7 @@
 <template>
     <div class="user-wrap">
-        <toast></toast>
-        <loading v-if="loadingStatus"></loading>
+        <toast ref="toast"></toast>
+        <loading v-if="noData"></loading>
         <div class="user-info-wrap" v-if="!playViewShow">
             <div class="user-info">
                 <div class="user-img"><img :src="userProfile.avatarUrl" alt="头像"></div>
@@ -30,6 +30,7 @@
             <div class="collection-wrap">
                 <rank-list-title :title="'我的歌单'" :fontSize="22" :textAlign="'left'"></rank-list-title>
                 <div class="collection">
+                    {{noData?'正在努力加载信息中~':''}}
                     <card-img class="card-imgs" v-for="item in collectionPlayList" :key="item.id"
                     :background="item.coverImgUrl+'?param=200y200'" :title="item.name" :hot="item.playCount"
                     @click.native="showMyCollection(item)"
@@ -81,6 +82,7 @@ export default {
             musicIDs:null,
             dataList:[],
             showLoading:true,
+            noData:true,
         }
     },methods:{
         showMoreHandler(e){
@@ -91,25 +93,37 @@ export default {
             let exp = new Date()
             let timer = null
             this.axios.get('/logout').then(re=>{
-                this.$refs.toast.showToast('已经退出登录,3秒后跳转到登录页面',3)
+                this.$refs.toast.showToast('已经退出登录,3秒后跳转到登录页面',3);
                 document.cookie = "MUSIC_U=;domain=localhost;expires="+exp.toGMTString()+";path=/";
+                document.cookie = "__csrf=;domain=localhost;expires="+exp.toGMTString()+";path=/";
+                document.cookie = "NMTID=;domain=localhost;expires="+exp.toGMTString()+";path=/";
                 timer = setTimeout(()=>{
                     window.location.reload()
                 },3000);
                 clearTimeout(timer)
             })
-            // console.log(exp.toGMTString());
+            // let ac = encodeURIComponent(this.loginCookie)
+            // console.log(ac);
+            // this.axios.get(`/login/refresh`,{
+            //     withCreDentials:true
+            // }).then(res=>{
+            //     console.log(res);
+            // }).catch(er=>{
+            //     console.dir(er);
+            // })
         },
         playShowHandler() {
             this.$store.commit('setPlayViewShow', false);
         },
         showMyCollection(item){
+            this.noData=true;
             // 给一个默认显示的歌单
             let id = item?item.id:313718455;
             // console.log(id);
             this.musicID = [];
             this.albumList = [];
             this.axios.get(`/playlist/detail?id=${id}`).then(re=>{
+                this.$store.dispatch('SetLoding', true);
                 let data = re.data.playlist;
                 this.albumDescription = [];
                 this.albumDescription.push({
@@ -149,8 +163,10 @@ export default {
                                 albumID:item.al.id,
                                 duration:item.dt,
                                 picUrl:item.al.picUrl
-                            })
-                            })
+                            });
+                            this.$store.dispatch('SetLoding', false);
+                            this.noData =false
+                        })
                     })
         },
         beforeunloadHandler(e){
@@ -159,7 +175,7 @@ export default {
             // let loginStatus = this.$store.state.loginStatus?this.$store.state.loginStatus:sessionStorage.getItem('loginStatus');
             this.loginStatus = this.$store.getters.getLoginStatus;
             this.loginCookie = this.$store.getters.getLoginCookie
-            this.userID = this.$store.state.userInfo.userId?this.$store.state.userInfo.userId:sessionStorage.getItem('userID');
+            this.userID = this.$store.state.userInfo.userId?this.$store.state.userInfo.userId:localStorage.getItem('userID');
             if(this.loginCookie){
                 this.axios.get(`/user/detail?uid=${this.userID}?cookie=${this.loginCookie}`).then(result=>{
                     // console.log(result);
@@ -221,6 +237,11 @@ export default {
         window.addEventListener('beforeunload',e=>{
             this.beforeunloadHandler(e)
         })
+        // this.axios.get('/login/status'+document.cookie).then(res=>{
+        //     console.log(res);
+        // }).catch(error=>{
+        //     console.log(error);
+        // })
         this.getUserInfo()
         this.getUserPlayList()
         this.showMyCollection()
@@ -236,6 +257,7 @@ export default {
 
 <style scoped>
     .collection-wrap{ 
+        
         padding: 20px;
     }
     .collection{
@@ -277,6 +299,7 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+        width: 100%;
         
     }
     .user-wrap .show-album-detail{

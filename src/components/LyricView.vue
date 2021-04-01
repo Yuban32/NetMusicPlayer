@@ -36,6 +36,7 @@ import { mapState } from 'vuex';
         this.axios.get('/lyric?id='+this.musicID).then(re => {
           this.lyric = re.data.lrc.lyric;
         }).catch(erorr => {
+          this.lyric = '暂无歌词哦~'
         })
         
       },

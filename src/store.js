@@ -7,14 +7,14 @@ export default new Vuex.Store({
 
     state: {
         musicInfo: {
-            musicID: 0,
+            musicID: 1833633769,
             musicName: '暂无歌曲',
             artist: '暂无',
             artistID: 0,
             album: '暂无',
-            albumID: 0,
-            picUrl: 0,
-            musicUrl: 0,
+            albumID: '',
+            picUrl: '',
+            musicUrl: 1833633769,
             duration: 0,
             totalTime: 0
         },
@@ -29,6 +29,8 @@ export default new Vuex.Store({
         userInfo: [],
         userID: null,
         LOADING: true,
+        musicVisualization:null,
+        playModes:null
     },
     mutations: {
         getUserInfo(state, info) {
@@ -87,13 +89,21 @@ export default new Vuex.Store({
         },
         setUserID(state, userID) {
             state.userID = userID;
-            sessionStorage.setItem('userID', userID);
+            localStorage.setItem('userID', userID);
         },
         SET_LOADING(state, loading) {
-            state.LOADING = loading
+            state.LOADING = loading;
         },
         CLEAN_LOADING(state) {
-            state.LOADING = false
+            state.LOADING = false;
+        },setMusicVisualization(state,flag){
+            state.musicVisualization = flag;
+            // console.log(state.musicVisualization);
+        },
+        setPlayMode(state,flag){
+            state.playModes = flag;
+            sessionStorage.setItem('NetMusicPlayer_PlayMode',flag)
+
         }
     },
     getters: {
@@ -103,8 +113,14 @@ export default new Vuex.Store({
         },
         getLoginStatus: state => {
             let status = state.loginStatus ? state.loginStatus : sessionStorage.getItem('loginStatus');
+            status = encodeURI(status)
+            
             return status;
         },
+        getPlayMode:state=>{
+            let mode = state.playModes?state.playModes:sessionStorage.getItem('NetMusicPlayer_PlayMode');
+            return mode;
+        }
     },
     actions: {
         SetLoding({

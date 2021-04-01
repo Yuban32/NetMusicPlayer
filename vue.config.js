@@ -10,5 +10,13 @@ module.exports = {
             maskIcon: 'favicon.ico',
             msTileImage: 'favicon.ico'
         }
+    },devServer:{
+        proxy:{
+            '/':{
+                target:'https://api.wick32.cn',
+                ws:true,
+                changeOrigin:true,
+            }
+        }
     }
 }

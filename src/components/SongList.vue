@@ -2,7 +2,7 @@
     <ul class="song-list-wrap">
         <li v-for="(item,index) in songList" :key="index">
             <div class="container">
-              <div class="line"></div>
+              <div class="line" :class="isPlayID==item.musicID?'lineActive':''"></div>
                 <span class="order">{{ index + 1 }}</span>
                 <img class="listImg" :src="item.picUrl + '?param=55y55'"/>
                 <span class="musicTitle">{{ item.musicName }}<span> - {{ item.artist }}</span></span>
@@ -26,6 +26,7 @@
 
 <script>
     import util from '@/util/util'
+import { mapState } from 'vuex'
     export default {
         name: 'songlist',
         data() {
@@ -60,8 +61,16 @@
                 this.$store.commit("isPlay", true);
                 this.$store.commit("getMusicInfo", MusicInfo);
             }
+        },watch:{
+          isPlayID(val){
+            return val;
+          }
+        },computed:{
+          ...mapState({
+            isPlayID:state=>state.musicInfo.musicID
+          })
         }
-    }
+      }
 </script>
 <style scoped>
   .listImg{
@@ -93,18 +102,32 @@
 }
 .line{
   position: absolute;
+  
   top: 0;
   left: -50px;
   width: 20px;
   height: 100%;
-  background-color: rgba(255, 0, 0, 0.479);
   transform: skewX(40deg);
+}
+.lineActive{
+  animation: container-line1 1.5s ease-in-out infinite;
+  background-color: rgba(255, 0, 0, 0.479);
+
 }
 @keyframes container-line {
   0%{
    width: 20px;
   }50%{
     width: 80%;
+  }100%{
+   width: 20px;
+  }
+}
+@keyframes container-line1 {
+  0%{
+   width: 20px;
+  }50%{
+    width: 40%;
   }100%{
    width: 20px;
   }
@@ -117,8 +140,9 @@
   
 
 }
-.container:hover .line{
+.container:hover .line{ 
   animation: container-line 1.5s ease-in-out infinite;
+  background-color: rgba(255, 0, 0, 0.479);
 }
 .musicTitle {
   line-height: 35px;
