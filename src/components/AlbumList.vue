@@ -34,7 +34,7 @@
         this.showAlbum = showAlbums;
       },
       showRecommAblum(id) {
-        console.log(id);
+
         let dataList = null
         this.recommTitle = "每日推荐歌单详情";
         this.axios

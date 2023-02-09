@@ -13,7 +13,7 @@ module.exports = {
     },devServer:{
         proxy:{
             '/':{
-                target:'https://api.wick32.cn',
+                target:'http://api.music.yuban32.com/',
                 ws:true,
                 changeOrigin:true,
             }

@@ -4,28 +4,54 @@ import Vue from 'vue';
 import axios from "axios";
 import VueAxios from 'vue-axios'
 import store from '../store';
+import vueRouter from '../router/index';
 // Full config:  https://github.com/axios/axios#request-config
-// axios.defaults.baseURL = process.env.baseURL || process.env.apiUrl || '';
-// axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
-// let cookies = document.cookie
-// console.log(cookies);
 let config = {
   
-  // baseURL: "https://api.wick32.cn",
+  // baseURL: "http://api.music-1.yuban32.com",
+  baseURL: "http://api.music.yuban32.com",
   withCredentials: true,
-  // baseURL:"http://music.kele8.cn",
-  // baseURL: process.env.baseURL || process.env.apiUrl || ""
+  // baseURL:"http://localhost:3000/",
   timeout: 60 * 1000, // Timeout
-  // withCredentials: true, // Check cross-site Access-Control
-  // xsrfCookieName:cookies,
+
 };
 
 const _axios = axios.create(config);
-
+function addCookie(config){
+  var cookie = localStorage.getItem('cookie');
+  if(cookie == null){
+    // vueRouter.push('/loginQR')
+      
+  }else{
+    /**
+     * #TODO 登录后进行cookie的拼接
+     * @Description get请求直接传cookie post请求则添加到body标签内
+     */
+    var encodeCookie = encodeURIComponent(cookie);
+    var urlBefore = config.url;
+    if(config.method == 'get'){
+      if(urlBefore.indexOf("?")==-1){
+        /**
+         * @description 判断原URL是不是已经有了查询参数
+         */
+        config.url = `${urlBefore}?cookie=${encodeCookie}`;
+      }else{
+        config.url = `${urlBefore}&cookie=${encodeCookie}`;
+      }
+    }
+    if(config.method == 'post'){
+      config.data = {
+        'cookie':cookie,
+        ...config.data
+      }
+    }
+  }
+}
 _axios.interceptors.request.use(
   function (config) {
     // Do something before request is sent
+    addCookie(config)
     store.dispatch('SetLoding', true);
     return config;
   },

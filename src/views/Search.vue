@@ -9,6 +9,7 @@
           placeholder="查询..."
           v-model="searchKeyWord"
           @keydown.enter="search"
+          @keydown="clearList"
         />
         <font-awesome-icon
           class="search-icon"
@@ -17,12 +18,22 @@
         />
       </div>
       {{ error }}
-      <div class="data-view">
+
+      <div class="hotSearch" v-show="hotShow">
+        <div v-for="item in hot" :key="item.first">
+          <p @click="hotClick($event)">{{item.first}}</p>
+        </div>
+      </div>
+      <div class="data-view" v-show="!hotShow">
         <ul @scroll="handleScroll($event)">
           <songlist :songList="songList"></songlist>
         </ul>
       </div>
     </div>
+    <!-- <div class="backForwardWrap" @click="clearList">
+      <font-awesome-icon class="backForward" :icon="['fas', 'chevron-left']">BACK</font-awesome-icon>
+      <span>BACK</span>
+    </div> -->
   </div>
 </template>
 <script>
@@ -40,9 +51,23 @@ export default {
       error: "什么都没有....",
       list: [],
       offset: 1,
+      hot:null,
+      hotShow:true,
+
     };
   },
   methods: {
+    clearList(){
+      this.hotShow=true;
+        console.log(this.hotShow);
+      
+    },
+    hotClick(e){
+      // console.log(e.target.innerText);
+      this.searchKeyWord = e.target.innerText;
+      this.search();
+
+    },
     sendInfo(musicID, musicName, artist, artistID, album, albumID, duration) {
       let list = [];
       let MusicInfo = [];
@@ -71,13 +96,23 @@ export default {
       document.title = `${musicName} - ${artist}`;
       this.$store.commit("isPlay", true);
     },
+    hotSearch(){
+      this.axios.get('/search/hot').then(res=>{
+        // console.log(res);
+        this.hot = res.data.result.hots
+        // console.log(this.hot);
+
+      }).catch(error=>{
+        console.log(error);
+      })
+    },
     search() {
       if (this.searchKeyWord != "") {
         clearTimeout(this.timer);
         this.list = [];
         this.timer = setTimeout(() => {
           this.axios
-            .get("https://api.wick32.cn/search?keywords=" + this.searchKeyWord)
+            .get("/search?keywords=" + this.searchKeyWord)
             .then((response) => {
               // console.log(response);
               let datas = response.data.result.songs;
@@ -103,6 +138,7 @@ export default {
                       picUrl: url,
                     });
                     this.songList = this.unique(this.list);
+                    this.hotShow = false
                   })
                   .catch((err) => {
                     // console.log(err);
@@ -180,6 +216,10 @@ export default {
   components:{
     "songlist":SongList,
     'loading':Loading,
+  },created(){
+    this.hotSearch()
+
+
   }
 };
 </script>
@@ -201,7 +241,7 @@ export default {
 .data-view > ul {
   /* overflow: auto; */
   overflow-y: scroll;
-  height: calc(100% - 90px);
+  /* height: calc(100% - 90px); */
 }
 
 .view {
@@ -230,4 +270,53 @@ export default {
   font-size: 22px;
   cursor: pointer;
 }
+.hotSearch {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-flow: wrap;
+  width: 300px;
+  height: 200px;
+  margin: 0 auto;
+}
+.hotSearch>div{
+  padding: 5px;
+  border: 1px solid white;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+.hotSearch>div p{
+  transition: all .2s;
+  cursor: pointer;
+}
+.hotSearch div p:hover{
+  color: white;
+}
+
+.backForwardWrap {
+    position: fixed;
+    cursor: pointer;
+    font-size: 35px;
+    height: 50px;
+    width: 150px;
+    right: -100px;
+    bottom: 100px;
+    background-color: rgba(122, 122, 122, 0.527);
+    border-radius: 10px 0 0 10px;
+    transition: all 0.2s ease-in;
+    line-height: 55px;
+    user-select: none;
+    z-index: 9;
+  }
+
+  .backForwardWrap:hover {
+    right: 0;
+  }
+
+  .backForwardWrap>span {
+    margin-left: 10px;
+    font-size: 30px;
+    line-height: 50px;
+  }
 </style>

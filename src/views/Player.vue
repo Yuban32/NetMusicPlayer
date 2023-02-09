@@ -1,11 +1,11 @@
 <template>
   <div class="player">
+    <canvas id="canvas"></canvas>
     <div class="songInfo">
-      <canvas id="canvas"></canvas>
-      <div class="cover">
+      <div class="cover" :class="isPlay?'cover-rotate':''">
         <img :src="musicInfo.picUrl + '?param=400y400'" />
       </div>
-      <h2 class="songTitle">{{ musicInfo.musicName }}</h2>
+      <h2 class="songTitle">{{ musicInfo.musicName }} <span v-if="musicKbps!=null||musicKbps!=undefined" class="musicKbps">{{musicKbps}}K</span></h2>
       <h3 class="artist">《{{ musicInfo.album }}》</h3>
       <h3 class="album">{{ musicInfo.artist }}</h3>
     </div>
@@ -17,6 +17,7 @@
 <script>
   // import { mapMutations } from 'vuex'
   import {
+    mapGetters,
     mapState
   } from "vuex";
   import lyricView from '@/components/LyricView'
@@ -24,48 +25,75 @@
     name: "Player",
     data() {
       return {
-        dataArray:null,
-        analyser:null,
-        bufferLength:null,
-        barHeight:null,
-        ctx:null,
-        WIDTH:null,
-        HEIGHT:null,
-        barWidth:null,
+        dataArray: null,
+        analyser: null,
+        bufferLength: null,
+        barHeight: null,
+        ctx: null,
+        WIDTH: null,
+        HEIGHT: null,
+        barWidth: null,
+        context: null,
+        coverRotate: false
       };
     },
+    props: ['musicKbps'],
     methods: {
       renderFrame() {
-          requestAnimationFrame(this.renderFrame);
 
-          this.analyser.getByteFrequencyData(this.dataArray);
+        // 矩形
+        this.analyser.getByteFrequencyData(this.dataArray);
 
-          this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
+        this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
 
-          for (var i = 0, x = 0; i < this.bufferLength; i++) {
-            this.barHeight = this.dataArray[i];
+        for (var i = 0, x = 0; i < this.bufferLength; i++) {
+          this.barHeight = this.dataArray[i];
 
-            var r = this.barHeight + 25 * (i / this.bufferLength);
-            var g = 250 * (i / this.bufferLength);
-            var b = 50;
+          var r = this.barHeight + 25 * (i / this.bufferLength);
+          var g = 250 * (i / this.bufferLength);
+          var b = 50;
 
-            this.ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-            this.ctx.fillRect(x, this.HEIGHT - this.barHeight, this.barWidth, this.barHeight);
+          this.ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+          this.ctx.fillRect(x, this.HEIGHT - this.barHeight, this.barWidth, this.barHeight);
 
-            x += this.barWidth + 2;
-          }
-        },
-      musicVisualization(flag) {
-        
-        let audio = this.$store.state.audioElement;
-        audio.pause()
-        var context = new(window.AudioContext || window.webkitAudioContext)();
-        this.analyser = context.createAnalyser();
+          x += this.barWidth + 2;
+        }
+        // 圆形
+        // let PI = Math.PI;
+        // let cr = 175;
+        // let minHeight = 2;
+        // let meterWidth = 5;
+        // let meterNum = 180;
+        // let gradient = this.ctx.createLinearGradient(0, -cr, 0, -this.WIDTH / 2);
+        // gradient.addColorStop(0, '#ccc');
+        // gradient.addColorStop(0.5, '#ccc');
+        // gradient.addColorStop(1, '#dad');
+        // this.ctx.fillStyle = gradient;
+
+        // this.analyser.getByteFrequencyData(this.dataArray)
+        // let step = Math.round(this.dataArray.length / meterNum);
+        // this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT)
+        // this.ctx.save();
+        // this.ctx.translate(this.WIDTH / 2, this.HEIGHT / 2);
+        // for (let i = 0; i < meterNum; i++) {
+        //   let value = this.dataArray[i * step];
+        //   let meterHeight = value * (this.HEIGHT / 2 - cr) / 856 || minHeight;
+        //   this.ctx.rotate(2 * PI / meterNum);
+        //   this.ctx.fillRect(-meterWidth / 2, -cr - meterHeight, meterWidth, meterHeight);
+        // }
+        // this.ctx.restore();
+        requestAnimationFrame(this.renderFrame);
+      },
+      musicVisualization() {
+        let audio = document.querySelector("audio")
+        // audio.pause()
+        this.context = new(window.AudioContext || window.webkitAudioContext)();
+        this.analyser = this.context.createAnalyser();
         this.analyser.fftSize = 512;
-        var source = context.createMediaElementSource(audio);
-        audio.play()
+        var source = this.context.createMediaElementSource(audio);
+        // audio.play()
         source.connect(this.analyser);
-        this.analyser.connect(context.destination);
+        this.analyser.connect(this.context.destination);
 
         this.bufferLength = this.analyser.frequencyBinCount;
         this.dataArray = new Uint8Array(this.bufferLength);
@@ -82,41 +110,88 @@
         this.barHeight;
 
         this.renderFrame();
+        this.coverRotate = true
       }
-      
+
     },
-    
-    watch:{
-        showMusicVisual(val){
-          if(val){
-            // this.musicVisualization();
-            // console.log('执行可视化');
-          }
-          return val
-        }
+
+    watch: {
+      loginStatus(val) {
+        return val
       },
+      showMusicVisual(val) {
+        if (val) {
+          if (this.$store.getters.getLoginStatus) {
+              this.musicVisualization();
+          }
+        } else {
+          if (this.loginStatus) {
+            if (this.context) {
+              this.context.close().then(res => {
+                console.log('可视化暂停');
+              })
+            }
+          }
+        }
+        return val
+      },
+      isPlay(val) {
+        return val
+      },
+    },
     computed: {
       // ...mapMutations(['getMusicId']),
       ...mapState(["musicInfo"]),
       ...mapState({
-        showMusicVisual:state=>state.musicVisualization
-      })
+        showMusicVisual: state => state.musicVisualization,
+        isPlay: state => state.isPlay,
+        loginStatus: state => state.loginStatus
+      }),
+
     },
     components: {
       lyricView,
+    },
+    mounted() {
     }
   };
 </script>
 <style scoped>
-  #canvas{
+  .musicKbps {
+    font-size: 16px;
+    border: 1px solid white;
+    padding: 2px;
+    box-sizing: border-box;
     position: absolute;
-    /* background-color: antiquewhite; */
-    bottom: 90px;
-    width: 50%;
+    top: 50%;
+    transform: translateY(-50%);
   }
+
+  .cover-rotate {
+    animation: rotates 5s linear infinite;
+  }
+
+  @keyframes rotates {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  #canvas {
+    position: absolute;
+    width:100%;
+    bottom: 0;
+    z-index: -1;
+  }
+
   .songInfo {
+    position: relative;
     overflow: hidden;
-    width: 50vw;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -129,10 +204,12 @@
     white-space: nowrap;
     overflow-y: hidden;
     overflow-x: auto;
+    position: relative;
   }
 
   .player {
     display: flex;
+    position: relative;
     /* justify-content: center; */
     width: 100%;
     align-items: center;
@@ -143,8 +220,8 @@
   .cover {
     position: relative;
     margin: 50px 0 50px 0;
-    width: auto;
-    min-height: auto;
+    min-width: 320px;
+    min-height: 320px;
     background-size: cover;
     overflow: hidden;
     border-radius: 50%;
@@ -152,8 +229,8 @@
   }
 
   .cover img {
-    width: 320px;
-    height: 320px;
+    width: 100%;
+    height: 100%;
   }
 
   .lyricView {

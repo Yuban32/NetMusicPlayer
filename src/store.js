@@ -30,25 +30,31 @@ export default new Vuex.Store({
         userID: null,
         LOADING: true,
         musicVisualization:null,
-        playModes:null
+        playModes:null,
+        firstLunch:true
     },
     mutations: {
+        setFirstLunch(state,flag){
+            state.firstLunch = flag;
+        },
         getUserInfo(state, info) {
             state.userInfo = info
         },
         setLoginCookie(state, cookie) {
             state.loginCookie = cookie;
-            document.cookie = cookie
+            localStorage.setItem('cookie',cookie);
         },
         setLoginStatus(state, status) {
             state.loginStatus = status;
-            sessionStorage.setItem('loginStatus', status)
+            localStorage.setItem('loginStatus', status)
 
         },
         getMusicInfo(state, MusicInfo) {
-            console.log(MusicInfo);
+            // console.log(MusicInfo);
+            tempArr = Array.from(tempArr)
             tempArr.push(MusicInfo[0])
-            state.musicList = util.unique(tempArr);
+            tempArr = util.unique(tempArr);
+            state.musicList = tempArr;
             state.musicInfo.musicID = MusicInfo[0].musicID;
             state.musicInfo.musicName = MusicInfo[0].musicName;
             state.musicInfo.artist = MusicInfo[0].artist;
@@ -62,9 +68,13 @@ export default new Vuex.Store({
             document.title = MusicInfo[0].musicName +' - ' +MusicInfo[0].album;
         },
         addMusicList(state, list) {
-            // let e = util.unique(list)
-            // state.musicList.push(...e)
-            // console.log(state.musicList);
+            // tempArr.push(list[0])
+            list.forEach(item=>{
+            tempArr.push(item)
+            })
+            tempArr = util.unique(tempArr)
+            
+            state.musicList = tempArr;
         },
         getPicURL(state, step) {
             state.musicInfo.picUrl = step;
@@ -104,24 +114,27 @@ export default new Vuex.Store({
         },
         setPlayMode(state,flag){
             state.playModes = flag;
-            sessionStorage.setItem('NetMusicPlayer_PlayMode',flag)
+            localStorage.setItem('NetMusicPlayer_PlayMode',flag)
 
         }
     },
     getters: {
         getLoginCookie: state => {
-            let cookies = state.loginCookie ? state.loginCookie : document.cookie;
+            let cookies = state.loginCookie ? state.loginCookie : localStorage.getItem("cookie");
             return cookies;
         },
         getLoginStatus: state => {
-            let status = state.loginStatus ? state.loginStatus : sessionStorage.getItem('loginStatus');
+            let status = state.loginStatus ? state.loginStatus : localStorage.getItem('loginStatus');
             status = encodeURI(status)
             
             return status;
         },
         getPlayMode:state=>{
-            let mode = state.playModes?state.playModes:sessionStorage.getItem('NetMusicPlayer_PlayMode');
+            let mode = state.playModes?state.playModes:localStorage.getItem('NetMusicPlayer_PlayMode');
             return mode;
+        },
+        getFirstLunch : state => {
+            return state.firstLunch;
         }
     },
     actions: {
@@ -134,6 +147,11 @@ export default new Vuex.Store({
             commit
         }) {
             commit('CLEAN_LOADING')
+        },
+        setFirstLunch({
+            commit
+        },flag){
+            commit('setFirstLunch',flag)
         }
     }
 })

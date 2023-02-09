@@ -15,7 +15,6 @@ class Util {
 
                 ]
             });
-            // navigator.mediaSession.setActionHandler('previoustrack',()=>{})
         }
     }
     zeroFill(num) {
@@ -33,6 +32,20 @@ class Util {
     unique(arr) {
         const res = new Map();
         return arr.filter((arr) => !res.has(arr.musicID) && res.set(arr.musicID, 1))
+    }
+    uniques(list){
+        console.log(list);
+        let arrs = []
+            let obj = []
+           
+            for(let i = 0;i<list.length;i++){
+                if(!obj[list[i].musicID]){
+                    arrs.push(list[i]);
+                    obj[list[i].musicID]=true
+                }
+            }
+            console.log(arrs);
+            return arrs
     }
 
 }

@@ -68,7 +68,7 @@
         });
         // console.log(musicID);
         // util.mediaMetaDataHandle(MusicInfo);
-        document.title = `${musicName} - ${artist} - Wick's播放器`;
+        document.title = `${musicName} - ${artist} - Yuban32播放器`;
         this.$store.commit("isPlay", true);
         this.$store.commit("getMusicInfo", MusicInfo);
       },

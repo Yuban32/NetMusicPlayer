@@ -8,7 +8,7 @@
       <div class="viws">
         <toast ref="toast"></toast>
         <keep-alive>
-        <player v-show="playViewShow" ref="players"></player>
+        <player v-show="playViewShow" ref="players" :musicKbps="musicKbps"></player>
         </keep-alive>
         <transition enter-active-class="**animated** bounceIn" leave-active-class="**animated** bounceOut">
           <router-view v-if="!showPlayList" />
@@ -40,9 +40,10 @@
               :icon="['fas', 'forward']" />
           </div>
 
-          <div class="progress-bar-wrap" @mousedown="fastForward" ref="progressBarWrap">
-            <div class="progress-bar" ref="progressBar" :style="{width:progressBarWidth+'%'}">
-              <div class="ball"></div>
+          <div class="progress-bar-wrap"  ref="progressBarWrap">
+            <div class="progress-bar" ref="progressBar" @mousedown="fastForward">
+              <div class="lines" :style="{width:progressBarWidth+'%'}"><div class="ball"></div></div>
+              
             </div>
             <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
           </div>
@@ -70,12 +71,12 @@
             </div>
           </div>
           <!-- :crossorigin="anonymous?'anonymous':'use-credentials'"  -->
-          <!-- <audio ref="audioElement" style="display:block;" :src="MusicUrl
+          <audio ref="audioElement" style="display:block;" :src="MusicUrl
           " @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
-            @seeked="setBufferedHandle" /> -->
-          <audio ref="audioElement" autoplay style="display:block;" :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicID}.mp3`
+            @seeked="setBufferedHandle"/>
+          <!-- <audio ref="audioElement" autoplay style="display:block;" :src="`https://music.163.com/song/media/outer/url?id=${musicInfo.musicID}.mp3`
                     " @pause="onPauseHandler" @play="onPlayHandler" @ended="onEndedHandler" @timeupdate="audioTimeUpdate"
-                      @seeked="setBufferedHandle" />
+                      @seeked="setBufferedHandle" /> -->
         </div>
 
       </div>
@@ -88,6 +89,7 @@
   import navigattion from "./components/nav.vue";
   import player from "./views/Player.vue";
   import {
+    mapActions,
     mapGetters,
     mapState
   } from "vuex";
@@ -117,27 +119,30 @@
         setTimeous:null,
         loginCookie:null,
         MusicVisual:null,
+        musicKbps:null,
       };
     },
     methods: {
-      // 获取真实的音乐URL地址 由于可视化失败 此方法暂时废弃
+      // 获取真实的音乐URL地址
       getMusicUrl(){
         this.loginCookie = this.$store.getters.getLoginCookie
         this.axios.get(`/song/url?id=${this.musicInfo.musicID}`).then(res=>{
-          // console.log(res);
+          // console.log(res.data.data[0]);
           
           // this.MusicUrl = res.data.data[0].url?res.data.data[0].url+'?infoId=92001':`https://music.163.com/song/media/outer/url?id=${this.musicInfo.musicID}.mp3`
           if(res.data.data[0].url){
             this.MusicUrl = res.data.data[0].url+'?infoId=92001';
             this.MusicVisual=true;
+            this.musicKbps = Math.floor(res.data.data[0].br/1000)
             this.audioElement.setAttribute('crossorigin','anonymous');
-            this.$store.commit('setMusicVisualization','执行');
+            
             // this.audioElement.
           }else{
             this.MusicVisual = false;
             this.audioElement.removeAttribute('crossorigin');
             this.MusicUrl = `https://music.163.com/song/media/outer/url?id=${this.musicInfo.musicID}.mp3`
-            this.$store.commit('setMusicVisualization','不执行');
+            this.$store.commit('setMusicVisualization',false);
+            this.$refs.toast.showToast('您还未登录,这首歌需要登录才能获取更好体验~',3);
           }
           // 在链接后面加入?infoId=92001 可以跨域 这个应该是网易后端开放出来给他们在知乎的团队用的 不是真正的跨域解决方案!
           
@@ -398,11 +403,10 @@
     mounted() {
       this.audioControls();
       this.volumeValues = this.audioElement.volume * 100;
-
-
     },
     created() {
       this.recommMusic();
+      // this.$store.dispatch('setFirstLunch',false)
     },
     computed: {
       ...mapState(["musicInfo"]),
@@ -414,11 +418,7 @@
         showPlayList:state=>state.showPlayList,
         MusicID:state=>state.musicInfo.musicID,
       }),
-      ...mapGetters(['getPlayMode'])
-
-      // getMusicCurrentTime(time){
-
-      // },
+      ...mapGetters(['getPlayMode']),
     },
     watch: {
       getPlayMode(val){
@@ -426,7 +426,7 @@
         // console.log(val);
       },
       MusicID(val){
-        // this.getMusicUrl()
+        this.getMusicUrl()
         return val;
       },
       musicList(val, old) {
@@ -438,10 +438,23 @@
         return val;
       },MusicUrl(val){
         clearTimeout(this.setTimeous)
-        setTimeout(()=>{
-          this.audioElement.play()
-        },1000)
+
+        if(!this.$store.getters.getFirstLunch){
+         this.setTimeous = setTimeout(()=>{
+          try{
+            this.$store.commit('setMusicVisualization',true);
+            this.audioElement.play()
+            }catch(err){
+            let e = err
+          }
+        },2000)
         return val
+        }else{
+          this.$refs.toast.showToast('首次进入不能自动播放哦',3)
+          this.$store.dispatch('setFirstLunch',false)
+          return val
+        }
+        
       }
     }
   };
@@ -657,7 +670,7 @@
     user-select: none;
   }
 
-  .progress-bar-wrap::before {
+  /* .progress-bar-wrap::before {
     content: '';
     display: block;
     height: 10px;
@@ -667,12 +680,12 @@
     top: 50%;
     transform: translateY(-50%);
     background-color: rgba(255, 255, 255, 0.604);
-  }
+  } */
 
   .progress-bar-wrap .progress-bar,
   .progress-bar-wrap .buffer-bar {
     height: 10px;
-    width: 60%;
+    width: 100%;
     border-radius: 10px;
     box-sizing: border-box;
     position: absolute;
@@ -683,15 +696,21 @@
   }
 
   .progress-bar-wrap .progress-bar {
-    background-color: rgb(0, 161, 214);
+    background-color: rgba(255, 255, 255, 0.604);
     z-index: 2;
   }
 
   .progress-bar-wrap:hover .ball {
     opacity: 1 !important;
   }
-
-  .progress-bar-wrap .progress-bar .ball {
+  .progress-bar-wrap .progress-bar .lines{
+    position: absolute;
+    height: 100%;
+    border-radius: 10px;
+    background-color: rgb(0, 183, 255);
+    z-index: 99;
+  }
+  .progress-bar-wrap .progress-bar .lines .ball {
     /* box-sizing: border-box; */
     width: 15px;
     height: 15px;
@@ -723,7 +742,7 @@
   }
 
   #app .viws>div {
-    /* flex: 1; */
+    flex: 1;
   }
 
   .viws-wrap {

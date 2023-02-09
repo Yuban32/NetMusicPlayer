@@ -67,12 +67,15 @@ const routes = [{
     name: 'User',
     component: () => import('../views/User.vue'),
     beforeEnter: (to, from, next) => {
-      let cookies = router.app.$options.store.getters.getLoginCookie ? router.app.$options.store.getters.getLoginCookie : document.cookie;
-      if (!cookies) {
-        next('/login');
-      } else {
+      let timestamp = new Date().valueOf()
+      // console.log(to);
+      let cookies = router.app.$options.store.getters.getLoginCookie ? router.app.$options.store.getters.getLoginCookie : localStorage.getItem("cookie");
+      if(cookies!==null){
         next();
+      }else{
+        next('/loginQR');
       }
+
     }
   }, {
     path: '/search',
@@ -91,6 +94,11 @@ const routes = [{
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')
+  },
+  {
+    path: '/loginQR',
+    name:"LoginQR",
+    component:()=>import('../views/QRLogin.vue')
   }
 ]
 

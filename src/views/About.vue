@@ -2,9 +2,9 @@
   <div class="about-wrap">
     <div class="about"  v-if="!playViewShow" :style="!playViewShow?'width:50%':'width:0px'">
       <div class="text">
-        <h1>Wick32音乐播放器 <a target="_blank" href="https://github.com/Mashiro10032/NetMusicPlayer"><font-awesome-icon :icon="['fab','github']" class="github-icon" /></a></h1>
+        <h1>Yuban32音乐播放器 <a target="_blank" href="https://github.com/Mashiro10032/NetMusicPlayer"><font-awesome-icon :icon="['fab','github']" class="github-icon" /></a></h1>
       <p>这是一款音乐播放器，搜索数据来自网易云音乐</p>
-      <p>本项目使用了Vue cli 4.x脚手架、Vue2.x、VueX、Vue-Router开发的</p>
+      <p>本项目使用了Vue cli 4.x脚手架、Vue2、VueX、Vue-Router3开发的</p>
       <p>本项目也不做任何兼容性处理，理论上现代较新的浏览器版本都支持（万恶的IE除外）</p>
       <p>后端部分用的是<a href="https://github.com/Binaryify/NeteaseCloudMusicApi">NeteaseCloudMusicApi</a>
       </p>
