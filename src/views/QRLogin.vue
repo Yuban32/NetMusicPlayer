@@ -32,6 +32,7 @@ export default {
         async login(){
             let timer;
             const cookie = localStorage.getItem('cookie');
+            console.log(cookie);
             this.checkStatus(cookie);
             const res = await this.axios({
                 url:`/login/qr/key?timerstamp=${Date.now()}`
@@ -43,6 +44,9 @@ export default {
             this.qrImg = res2.data.data.qrimg;
 
             timer = setInterval(async ()=>{
+                if(cookie!=null){
+                    return
+                }
                 const statusRes = await this.checkStatus(key);
                 console.log(statusRes);
                 if(statusRes.code === 800){

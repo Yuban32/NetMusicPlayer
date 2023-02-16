@@ -98,7 +98,14 @@ const routes = [{
   {
     path: '/loginQR',
     name:"LoginQR",
-    component:()=>import('../views/QRLogin.vue')
+    component:()=>import('../views/QRLogin.vue'),
+    beforeEnter:(to,from,next)=>{
+      let cookies = router.app.$options.store.getters.getLoginCookie ? router.app.$options.store.getters.getLoginCookie : localStorage.getItem("cookie");
+      if(cookies!=null){
+        next(from['path'])
+      }
+      next()
+    }
   }
 ]
 
