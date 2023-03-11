@@ -140,7 +140,9 @@
           }else{
             this.MusicVisual = false;
             this.audioElement.removeAttribute('crossorigin');
-            this.MusicUrl = `https://music.163.com/song/media/outer/url?id=${this.musicInfo.musicID}.mp3`
+            // this.MusicUrl = `https://music.163.com/song/media/outer/url?id=${this.musicInfo.musicID}.mp3`
+            this.MusicUrl = `/song/url/v1?id=33894312${this.musicInfo.musicID}`
+
             this.$store.commit('setMusicVisualization',false);
             this.$refs.toast.showToast('您还未登录,这首歌需要登录才能获取更好体验~',3);
           }

@@ -13,6 +13,7 @@ export default {
     data() {
         return {
             qrImg: '',
+            timer:""
         }
     }, methods: {
         async checkStatus(key){
@@ -30,9 +31,8 @@ export default {
             return res.data;
         },
         async login(){
-            let timer;
             const cookie = localStorage.getItem('cookie');
-            console.log(cookie);
+
             this.checkStatus(cookie);
             const res = await this.axios({
                 url:`/login/qr/key?timerstamp=${Date.now()}`
@@ -43,7 +43,7 @@ export default {
             });
             this.qrImg = res2.data.data.qrimg;
 
-            timer = setInterval(async ()=>{
+            this.timer = setInterval(async ()=>{
                 if(cookie!=null){
                     return
                 }
@@ -51,7 +51,7 @@ export default {
                 console.log(statusRes);
                 if(statusRes.code === 800){
                     this.$refs.toast.showToast('二维码过期',3);
-                    clearInterval(timer)
+                    clearInterval(this.timer)
                 }
                 if(statusRes.code === 803){
                     this.$refs.toast.showToast("登录成功,3秒后跳转到个人界面",3);
@@ -76,6 +76,8 @@ export default {
         
     },components:{
         'toast':Toast
+    },beforeDestroy(){
+        clearInterval(this.timer)
     }
 }
 
