@@ -1,6 +1,6 @@
 # NetMusicPlayer
 # 一款网络音乐播放器
-暂无预览
+在线预览 music.yuban32.com
 
 ## 前端部分
 项目使用Vue cli 4.x脚手架、Vue2.x、VueX、Vue-Router开发的基于网易云的音乐播放器，
