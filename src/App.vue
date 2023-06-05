@@ -41,15 +41,17 @@
           </div>
 
           <div class="progress-bar-wrap"  ref="progressBarWrap">
-            <div class="progress-bar" ref="progressBar" @mousedown="fastForward">
+            <!-- <div class="progress-bar" ref="progressBar">
               <div class="lines" :style="{width:progressBarWidth+'%'}"><div class="ball"></div></div>
               
             </div>
+             -->
+            <input class="progress-bar" type="range" max="100" :value="progressBarWidth" @mousedown="fastForwardHandle">
             <div class="buffer-bar" ref="bufferBar" :style="{width:bufferedWidth+'%'}"></div>
           </div>
 
 
-          <div class="volume-wrap" @mouseleave="volumeShow=false">
+          <div class="volume-wrap" @mouseleave="volumeShow=false" ref="progress">
             <div class="volume" v-show="volumeShow">
               {{parseInt(volumeValues)}}
               <input type="range" max="100" :value="volumeValues" class="range" @mousedown="volumeHandle" ref="volume">
@@ -271,9 +273,7 @@
         //获取当前播放时间
         let currentTime = parseInt(this.audioElement.currentTime);
         let duration = this.audioElement.duration;
-        let buffered = this.audioElement.buffered;
         // 获取元素
-        let bufferBar = this.$refs.bufferBar;
         this.currentTime = util.playTimeFormat(currentTime);
         let progressScale = currentTime / duration;
         // console.log(progressScale);
@@ -283,10 +283,9 @@
         // this.fastForward();
 
       },
-      fastForward(e) {
+      fastForwardHandle(e) {
         let progressBarWrapOffsetWidth = e.target.offsetWidth;
         let jumpPoint = parseInt((e.offsetX / progressBarWrapOffsetWidth) * 100);
-        // console.log(e.offsetX, progressBarWrapOffsetWidth);
         let mouseX = 0;
         this.audioElement.currentTime = Math.floor((jumpPoint / 100) * this.audioElement.duration);
 
@@ -301,14 +300,11 @@
           if (mouseX < 0) {
             mouseX = 0;
           }
-          // console.log(mouseX);
           this.audioElement.currentTime = Math.floor((mouseX / 100) * this.audioElement.duration);
         }
         document.onmouseup = () => {
           document.onmousemove = null;
         }
-        // console.log(jumpPoint);
-        // console.log(this.fastForwardPoint);
       },
       setBufferedHandle() {
         let currentTime = parseInt(this.audioElement.currentTime);
@@ -696,7 +692,6 @@
     left: 0;
 
   }
-
   .progress-bar-wrap .progress-bar {
     background-color: rgba(255, 255, 255, 0.604);
     z-index: 2;
